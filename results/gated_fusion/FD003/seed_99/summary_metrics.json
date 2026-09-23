@@ -1,0 +1,17 @@
+{
+  "Gated_Fusion": {
+    "RMSE": 13.900516176588045,
+    "MAE": 8.894307136535645,
+    "PHM_score": 738.77783203125,
+    "n_test": 100
+  },
+  "_meta": {
+    "dataset": "FD003",
+    "seed": 99,
+    "runtime_sec": 132.85907411575317,
+    "n_raw_features": 16,
+    "n_trend_features": 16,
+    "n_train_windows": 18562,
+    "mean_test_gate_value": 0.5263682007789612
+  }
+}
