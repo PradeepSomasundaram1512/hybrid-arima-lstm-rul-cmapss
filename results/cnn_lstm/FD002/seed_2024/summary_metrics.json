@@ -1,0 +1,15 @@
+{
+  "CNN_LSTM": {
+    "RMSE": 14.327207513052581,
+    "MAE": 9.968259811401367,
+    "PHM_score": 1143.5604248046875,
+    "n_test": 259
+  },
+  "_meta": {
+    "dataset": "FD002",
+    "seed": 2024,
+    "runtime_sec": 286.0369322299957,
+    "n_features": 21,
+    "n_train_windows": 39121
+  }
+}
