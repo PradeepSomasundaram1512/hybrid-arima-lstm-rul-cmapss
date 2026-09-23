@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+*.aux
+*.log
+*.out
+compile1.log
+compile2.log
+_arima_cache_*.parquet

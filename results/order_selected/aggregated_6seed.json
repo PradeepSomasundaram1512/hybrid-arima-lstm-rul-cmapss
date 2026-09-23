@@ -1,0 +1,54 @@
+{
+  "FD001": {
+    "plain_mean": 14.430177304276569,
+    "plain_std": 0.6370893491442652,
+    "fixed_mean": 14.923947685742887,
+    "fixed_std": 1.6508338582540631,
+    "sel_mean": 14.375255182423052,
+    "sel_std": 0.5543929426930926,
+    "wilcoxon_p_vs_fixed": 0.6875,
+    "n_sel_better_vs_fixed": 4,
+    "wilcoxon_p_vs_plain": 1.0,
+    "n_sel_better_vs_plain": 3,
+    "n_seeds": 6
+  },
+  "FD002": {
+    "plain_mean": 14.588809533788138,
+    "plain_std": 0.4906079699969764,
+    "fixed_mean": 14.931850827628153,
+    "fixed_std": 0.5975376649951666,
+    "sel_mean": 13.769780661691593,
+    "sel_std": 0.22991167329023152,
+    "wilcoxon_p_vs_fixed": 0.03125,
+    "n_sel_better_vs_fixed": 6,
+    "wilcoxon_p_vs_plain": 0.03125,
+    "n_sel_better_vs_plain": 6,
+    "n_seeds": 6
+  },
+  "FD003": {
+    "plain_mean": 14.718946039394359,
+    "plain_std": 2.058493539511479,
+    "fixed_mean": 14.866116730281368,
+    "fixed_std": 0.5823255516364237,
+    "sel_mean": 14.453296415605534,
+    "sel_std": 0.7062267292373461,
+    "wilcoxon_p_vs_fixed": 0.21875,
+    "n_sel_better_vs_fixed": 5,
+    "wilcoxon_p_vs_plain": 0.5625,
+    "n_sel_better_vs_plain": 4,
+    "n_seeds": 6
+  },
+  "FD004": {
+    "plain_mean": 14.923212645620003,
+    "plain_std": 0.3780599763008163,
+    "fixed_mean": 15.714312279168775,
+    "fixed_std": 0.5350138795309706,
+    "sel_mean": 14.904939530068487,
+    "sel_std": 0.42369405273896044,
+    "wilcoxon_p_vs_fixed": 0.03125,
+    "n_sel_better_vs_fixed": 6,
+    "wilcoxon_p_vs_plain": 1.0,
+    "n_sel_better_vs_plain": 4,
+    "n_seeds": 6
+  }
+}
