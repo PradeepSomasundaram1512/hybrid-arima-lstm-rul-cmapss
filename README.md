@@ -19,6 +19,7 @@ Earlier versions of this repository stated that the hybrid "significantly and co
 ## Repository layout
 
 - `paper_icaiet_camera_ready_20seed.pdf/.tex` : the 6-page paper (20-seed evidence, recommended final version). `paper.pdf/.tex` : the same paper plus an appendix (cost, convergence, six-seed ablation and gated fusion). `paper_icaiet_camera_ready.pdf/.tex` : the earlier six-seed version that was reviewed.
+- `archive_old_versions/` : superseded early drafts (short and blind-review versions), kept for the record only.
 - `code/`
   - `run_dataset.py` (plain LSTM, Random Forest, fixed-order hybrid), `run_dataset_order_selected.py` (AIC-selected order), `run_dataset_causal.py` (causal expanding-window ARIMA), `run_trend_controls.py` (moving average, exponential smoothing), `run_capacity_controls.py` (parameter-matched and duplicated-input plain LSTMs), `run_cnn_lstm_baseline.py`, `run_gated_fusion.py`, `ablation_window.py`
   - `feature_cache.py` : dataset-level cache of ARIMA features, guarded by a SHA-256 fingerprint of the normalised data
