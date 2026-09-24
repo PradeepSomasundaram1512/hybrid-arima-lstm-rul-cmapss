@@ -1,0 +1,22 @@
+{
+ "FD001": {
+  "series": 180,
+  "cycles": 39585,
+  "ma_ms_per_series": 0.10751666666635924,
+  "ema_ms_per_series": 0.05832222222206375,
+  "fullseries_arima_ms_per_series": 6.308422222222341,
+  "causal_arima_ms_per_series": 274.2873277777777,
+  "ratio_causal_over_ma": 2551.114504218527,
+  "ratio_causal_over_fullseries": 43.47954498219229
+ },
+ "FD002": {
+  "series": 252,
+  "cycles": 48384,
+  "ma_ms_per_series": 0.10346825396806161,
+  "ema_ms_per_series": 0.05297222222238369,
+  "fullseries_arima_ms_per_series": 5.055246031745859,
+  "causal_arima_ms_per_series": 222.46538888888867,
+  "ratio_causal_over_ma": 2150.0835314913006,
+  "ratio_causal_over_fullseries": 44.006837153296566
+ }
+}
