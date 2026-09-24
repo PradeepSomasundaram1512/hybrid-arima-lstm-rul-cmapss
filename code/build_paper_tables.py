@@ -45,22 +45,27 @@ rows = []
 for key, label in eq_pairs:
     cells = []
     for r in J["comparisons"][key]:
-        v = f"{r['min_margin']:.2f}"; cells.append(f"\\textbf{{{v}}}" if r["min_margin"] <= 1.0 else v)
+        v = f"{r['min_margin']:.2f}"; v = f"\\textbf{{{v}}}" if r["min_margin"] <= 1.0 else v
+        cells.append(v + ("$^\\dagger$" if r["p_tost_holm"] < 0.05 else ""))
     rows.append(f"{label} & " + " & ".join(cells) + " \\\\")
 open("equiv.tex", "w").write("\n".join(rows))
-# ---- seed budget table
+# ---- seed budget table (overall and by effect size)
 S = J["sign_stability"]; ks = (3, 6, 10)
 cells = [c for v in S.values() for c in v]
-med = [np.median([c[f"p_sign_ok_k{k}"] for c in cells]) for k in ks]; mn = [min(c[f"p_sign_ok_k{k}"] for c in cells) for k in ks]
+def stat(sel, k):
+    v = [c[f"p_sign_ok_k{k}"] for c in sel]; return np.median(v), min(v)
+big = [c for c in cells if abs(c["mean_20"]) >= 0.5]; small = [c for c in cells if abs(c["mean_20"]) < 0.3]
 sb = J["seed_budget"]; anysig = []
 for k in ks:
     vals = [next(x["p_any_holm_sig"] for x in v["by_k"] if x["k"] == k) for v in sb.values() if any(x["k"] == k for x in v["by_k"])]
     anysig.append(np.mean(vals))
-rows = ["Sign recovered, median over %d cells & " % len(cells) + " & ".join(f"{x:.2f}" for x in med) + " \\\\",
-        "Sign recovered, worst cell & " + " & ".join(f"{x:.2f}" for x in mn) + " \\\\",
+def fmt(sel): return " & ".join(f"{stat(sel, k)[0]:.2f} / {stat(sel, k)[1]:.2f}" for k in ks)
+rows = [f"All {len(cells)} cells & " + fmt(cells) + " \\\\",
+        f"$|\\Delta|\\ge0.5$ ({len(big)} cells) & " + fmt(big) + " \\\\",
+        f"$|\\Delta|<0.3$ ({len(small)} cells) & " + fmt(small) + " \\\\",
         "Any two-level significant cell (mean) & " + " & ".join(f"{x:.2f}" for x in anysig) + " \\\\"]
 open("budget.tex", "w").write("\n".join(rows))
-print("equiv and budget tables written; flips in original six seeds:", sum(c["sign_flips_in_orig6"] for c in cells), "of", len(cells))
+print("equiv and budget tables written; flips in original six seeds:", sum(c["sign_flips_in_orig6"] for c in cells), "of", len(cells), "| strata", len(big), len(small))
 
 # ---- MAE / PHM table
 mm = [("plain","Plain LSTM"),("noncausal","Fixed ARIMA"),("order_sel","AIC ARIMA"),("causal","Causal ARIMA"),("ma","Moving avg")]

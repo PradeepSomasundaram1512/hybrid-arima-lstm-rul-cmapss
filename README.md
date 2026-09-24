@@ -8,10 +8,10 @@ We evaluate, rather than propose, ARIMA trend augmentation for LSTM-based remain
 
 Main findings (20 seeds):
 
-- **Effects depend on the dataset.** On FD002 trend features lower RMSE, most with AIC-selected ARIMA (-1.00 cycles, seed-level Holm p = 0.0004) and a moving average (-0.69); on FD001 and FD003 they do not help.
-- **The FD004 penalty is an input-width effect.** Duplicating the input with no new information reproduces it (+0.50 RMSE), so it is not evidence that the ARIMA trend is uninformative.
-- **Causal construction costs no accuracy.** Causal and fixed-order hybrids are equivalent, at about 44 times the feature-construction cost.
-- **A moving average matches or beats causal ARIMA** on three of four datasets, at about 1/2000 of the feature cost.
+- **Effects depend on the dataset and the test.** On FD002 trend features lower RMSE at the seed level, most with (non-causal) AIC-selected ARIMA (-1.00 cycles, Holm p = 0.0004) and a moving average (-0.69), but none of the FD002 effects survives the two-level test; on FD001 and FD003 they do not help.
+- **Input width likely contributes to the FD004 penalty.** Duplicating the input with no new information gives a penalty of similar size (+0.50 RMSE), so the penalty need not implicate the ARIMA trend; this does not show that width is the only cause.
+- **Causal construction did not cost accuracy.** Causal and fixed-order hybrids did not differ beyond a prespecified ±1-cycle margin (Holm-adjusted TOST), at about 44 times the feature-construction cost.
+- **A moving average had lower RMSE than causal ARIMA** on three of four datasets at the seed level (none survives the two-level test), at about 1/2000 of the feature cost.
 - **Few-seed conclusions are fragile.** The original six seeds reversed the sign of the mean effect in 6 of 20 comparisons. Seed-level tests find 15 of 48 comparison cells significant, but a stricter two-level test (seeds and test engines as crossed factors) finds only 2.
 
 Earlier versions of this repository stated that the hybrid "significantly and consistently beats the plain LSTM on FD002" and, later, that no hybrid beats the plain LSTM. Neither statement is supported once 20 seeds and both test levels are used; the statements above replace them.
@@ -23,7 +23,7 @@ Earlier versions of this repository stated that the hybrid "significantly and co
   - `run_dataset.py` (plain LSTM, Random Forest, fixed-order hybrid), `run_dataset_order_selected.py` (AIC-selected order), `run_dataset_causal.py` (causal expanding-window ARIMA), `run_trend_controls.py` (moving average, exponential smoothing), `run_capacity_controls.py` (parameter-matched and duplicated-input plain LSTMs), `run_cnn_lstm_baseline.py`, `run_gated_fusion.py`, `ablation_window.py`
   - `feature_cache.py` : dataset-level cache of ARIMA features, guarded by a SHA-256 fingerprint of the normalised data
   - `run_extra_seeds.py` : runs every variant for the 14 additional seeds (1 to 15 except 7, fixed in advance) and restores the AIC-selected per-engine predictions; resumable
-  - `analysis_extended.py` (all comparisons, seed-level and two-level tests, equivalence, seed budget, power), `variance_shares.py`, `hier_bootstrap.py`, `equiv_seedbudget.py`, `timing_feature_construction.py`
+  - `analysis_extended.py` (all comparisons, seed-level and two-level tests, equivalence, seed budget, power), `variance_shares.py` (48 cells, the 12 comparisons of Table II), `hier_bootstrap.py`, `equiv_seedbudget.py`, `timing_feature_construction.py`
   - `make_extended_figures.py`, `build_paper_tables.py` : figures and LaTeX tables generated from the results
 - `data/` : NASA C-MAPSS FD001-FD004 (parquet), from [LucasThil's Hugging Face mirror](https://huggingface.co/datasets/LucasThil/nasa_turbofan_degradation_FD001) of the NASA Prognostics Center of Excellence data
 - `results/` : per-seed metrics and per-engine predictions for every variant; `results/extended_analysis.json` holds every statistic in the paper

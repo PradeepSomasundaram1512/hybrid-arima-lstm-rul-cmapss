@@ -13,8 +13,9 @@ def load(m, fd):
     for s in SEEDS:
         d = json.load(open(tp.format(fd=fd, s=s)))[k]; out.append(np.abs(np.array(d["y_pred"]) - np.array(d["y_true"])))
     return np.array(out)
+# exactly the 12 comparisons of Table II
 PAIRS = [("noncausal", "plain"), ("order_sel", "plain"), ("causal", "plain"), ("ma", "plain"), ("ema", "plain"), ("pm_plain", "plain"), ("dup_plain", "plain"),
-         ("order_sel", "noncausal"), ("causal", "noncausal"), ("ma", "causal"), ("ma", "order_sel"), ("noncausal", "dup_plain"), ("ma", "dup_plain")]
+         ("order_sel", "noncausal"), ("causal", "noncausal"), ("ma", "causal"), ("noncausal", "dup_plain"), ("ma", "dup_plain")]
 res = {}; shares = []
 for fd in DS:
     E = {m: load(m, fd) for m in SRC}
