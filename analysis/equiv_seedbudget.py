@@ -3,7 +3,7 @@ Two additional analyses on existing per-engine predictions (no retraining):
  1. Equivalence testing (TOST) of each trend/architecture variant against the plain LSTM.
  2. Seed-budget analysis: how often would a study with k seeds reach the same
     conclusion as the full six-seed study, and how many seeds are needed.
-Run from the repository root: python3 code/equiv_seedbudget.py
+Run from the repository root: python3 analysis/equiv_seedbudget.py
 """
 import json, itertools, warnings
 import numpy as np

@@ -1,6 +1,6 @@
 """Share of the variance of each paired mean difference that comes from training seeds vs test-engine sampling.
 Var(mean) = sigma2_seed/S + [sigma2_engine/E + sigma2_resid/(S*E)]; the seed component is floored at zero.
-Run from the repository root: python3 code/variance_shares.py"""
+Run from the repository root: python3 analysis/variance_shares.py"""
 import json, os, numpy as np
 DS = ["FD001", "FD002", "FD003", "FD004"]
 SEEDS = [42, 123, 2024, 7, 99, 314] + [s for s in range(1, 16) if s != 7]

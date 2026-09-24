@@ -49,6 +49,6 @@ for ax, fd in zip(axes, datasets):
     ax.set_title(fd, fontsize=10)
 axes[0].set_ylabel("Absolute error (cycles)")
 plt.tight_layout()
-plt.savefig("paper/fig_error_dist.pdf", bbox_inches="tight")
-plt.savefig("paper/fig_error_dist.png", dpi=150, bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_error_dist.pdf", bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_error_dist.png", dpi=150, bbox_inches="tight")
 print("Saved paper/fig_error_dist.{pdf,png}")

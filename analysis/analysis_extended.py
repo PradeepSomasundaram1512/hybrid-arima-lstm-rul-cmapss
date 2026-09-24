@@ -6,7 +6,7 @@ Extended analysis over every available seed (no retraining). For each paired com
     the larger p kept; Holm across datasets; equivalence margins (90% interval)
   * seed budget: how often a k-seed study reaches the all-seed conclusion (random subsets)
   * seeds needed for 80% power on the per-seed RMSE differences
-Run from the repository root: python3 code/analysis_extended.py
+Run from the repository root: python3 analysis/analysis_extended.py
 """
 import json, os, warnings
 import numpy as np

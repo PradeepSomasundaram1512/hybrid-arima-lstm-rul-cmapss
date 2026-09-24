@@ -26,8 +26,8 @@ ax.set_ylabel("RMSE (cycles)")
 ax.set_title("RUL prediction RMSE, mean ± std over 6 seeds")
 ax.legend(fontsize=8)
 plt.tight_layout()
-plt.savefig("paper/fig_cross_dataset.pdf", bbox_inches="tight")
-plt.savefig("paper/fig_cross_dataset.png", dpi=150, bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_cross_dataset.pdf", bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_cross_dataset.png", dpi=150, bbox_inches="tight")
 print("Saved fig_cross_dataset (multi-seed)")
 
 # ---- Fig 2: predicted vs true RUL scatter, hybrid model, pooled across 3 seeds ----
@@ -48,8 +48,8 @@ for ax, fd in zip(axes, DATASETS):
     ax.set_xlabel("True RUL")
 axes[0].set_ylabel("Predicted RUL")
 plt.tight_layout()
-plt.savefig("paper/fig_scatter_all.pdf", bbox_inches="tight")
-plt.savefig("paper/fig_scatter_all.png", dpi=150, bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_scatter_all.pdf", bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_scatter_all.png", dpi=150, bbox_inches="tight")
 print("Saved fig_scatter_all (pooled 3 seeds, hybrid model)")
 
 # ---- Fig 3: per-engine absolute error, seed-averaged, plain vs hybrid ----
@@ -71,6 +71,6 @@ for ax, fd in zip(axes, DATASETS):
     ax.set_title(fd, fontsize=10)
 axes[0].set_ylabel("Mean absolute error\nover 6 seeds (cycles)")
 plt.tight_layout()
-plt.savefig("paper/fig_error_dist.pdf", bbox_inches="tight")
-plt.savefig("paper/fig_error_dist.png", dpi=150, bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_error_dist.pdf", bbox_inches="tight")
+plt.savefig("manuscript/icaiet2027/figures/fig_error_dist.png", dpi=150, bbox_inches="tight")
 print("Saved fig_error_dist (seed-averaged per-engine error)")

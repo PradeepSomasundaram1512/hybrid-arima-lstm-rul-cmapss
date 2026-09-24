@@ -18,14 +18,16 @@ Earlier versions of this repository stated that the hybrid "significantly and co
 
 ## Repository layout
 
-- `paper_icaiet_camera_ready_20seed.pdf/.tex` : the 6-page paper (20-seed evidence, recommended final version). `paper.pdf/.tex` : the same paper plus an appendix (cost, convergence, six-seed ablation and gated fusion). `paper_icaiet_camera_ready.pdf/.tex` : the earlier six-seed version that was reviewed.
-- `archive_old_versions/` : superseded early drafts (short and blind-review versions), kept for the record only.
-- `code/`
+- `manuscript/icaiet2027/` : the 6-page paper (20-seed evidence, final version): `main.tex`, `ICAIET2027_Somasundaram_ARIMA_LSTM_RUL.pdf`, `figures/`, and `tables/` (LaTeX table rows written by `build_paper_tables.py`).
+- `manuscript/extended/` : the same paper plus an appendix (cost, convergence, six-seed ablation and gated fusion): `main.tex`, `ARIMA_LSTM_RUL_extended.pdf`. It uses the figures in `manuscript/icaiet2027/figures/`.
+- `manuscript/tools/` : `build_paper_tables.py` (tables from `results/extended_analysis.json`), `make_extended_figures.py`, `make_multiseed_figures.py`, `make_ablation_figure.py`.
+- `archive_old_versions/` : superseded versions kept for the record only: the six-seed version that was reviewed (`ICAIET2027_ARIMA_LSTM_RUL_reviewed_6seed.tex/.pdf`) and earlier short and blind-review drafts.
+- `experiments/` : training runs
   - `run_dataset.py` (plain LSTM, Random Forest, fixed-order hybrid), `run_dataset_order_selected.py` (AIC-selected order), `run_dataset_causal.py` (causal expanding-window ARIMA), `run_trend_controls.py` (moving average, exponential smoothing), `run_capacity_controls.py` (parameter-matched and duplicated-input plain LSTMs), `run_cnn_lstm_baseline.py`, `run_gated_fusion.py`, `ablation_window.py`
   - `feature_cache.py` : dataset-level cache of ARIMA features, guarded by a SHA-256 fingerprint of the normalised data
-  - `run_extra_seeds.py` : runs every variant for the 14 additional seeds (1 to 15 except 7, fixed in advance) and restores the AIC-selected per-engine predictions; resumable
-  - `analysis_extended.py` (all comparisons, seed-level and two-level tests, equivalence, seed budget, power), `variance_shares.py` (48 cells, the 12 comparisons of Table II), `hier_bootstrap.py`, `equiv_seedbudget.py`, `timing_feature_construction.py`
-  - `make_extended_figures.py`, `build_paper_tables.py` : figures and LaTeX tables generated from the results
+  - `run_extra_seeds.py` : runs every variant for the 14 additional seeds (1 to 15 except 7, fixed in advance) and restores the AIC-selected per-engine predictions; resumable; logs go to `results/logs/`
+  - `timing_feature_construction.py` : feature-construction cost
+- `analysis/` : `analysis_extended.py` (all comparisons, seed-level and two-level tests, equivalence, seed budget, power), `variance_shares.py` (48 cells, the 12 comparisons of Table II), `hier_bootstrap.py`, `equiv_seedbudget.py`, `statistical_analysis.py`, and the `aggregate_*.py` / `analyze_*.py` summaries
 - `data/` : NASA C-MAPSS FD001-FD004 (parquet), from [LucasThil's Hugging Face mirror](https://huggingface.co/datasets/LucasThil/nasa_turbofan_degradation_FD001) of the NASA Prognostics Center of Excellence data
 - `results/` : per-seed metrics and per-engine predictions for every variant; `results/extended_analysis.json` holds every statistic in the paper
 - `requirements.txt`, `reproduce.sh` : exact package versions and the full reproduction sequence
@@ -35,10 +37,13 @@ Earlier versions of this repository stated that the hybrid "significantly and co
 ```bash
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt          # exact versions used for every result
-python3 code/run_dataset.py FD001 42     # one dataset and seed
+python3 experiments/run_dataset.py FD001 42   # one dataset and seed
 ./reproduce.sh                            # everything (hours)
-python3 code/analysis_extended.py         # statistics on the archived predictions
+python3 analysis/analysis_extended.py       # statistics on the archived predictions
+python3 manuscript/tools/build_paper_tables.py   # LaTeX table rows for the paper
 ```
+
+Run every script from the repository root.
 
 With the pinned versions on CPU, reruns reproduce archived results essentially exactly: the main pipeline matched to four decimals on FD001 (seeds 42 and 123, also with a different thread count), and all 24 AIC-selected reruns matched their earlier RMSEs to within 4e-15. The causal ARIMA feature costs about 222 ms of CPU per series against 0.10 ms for the moving average, so features are computed once per dataset and reused across seeds; each reuse is verified against a fingerprint of the normalised series and rejected if the data differ.
 

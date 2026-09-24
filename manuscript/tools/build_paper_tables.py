@@ -1,6 +1,9 @@
-"""Fill %%MEANS%% and %%PAIRED%% in the template from results/extended_analysis.json (no hand-typed numbers)."""
+"""Write the LaTeX table rows (means, paired, equiv, budget, metrics, pvals) from results/extended_analysis.json
+into manuscript/icaiet2027/tables/ (no hand-typed numbers). Run from the repository root."""
 import json, sys, pathlib
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+TAB = ROOT / "manuscript" / "icaiet2027" / "tables"
+TAB.mkdir(parents=True, exist_ok=True)
 R = str(ROOT / "results" / "extended_analysis.json")
 J = json.load(open(R)); DS = ["FD001", "FD002", "FD003", "FD004"]
 
@@ -34,7 +37,7 @@ for key, label in pairs:
         cells.append(f"{r['mean_rmse_diff']:+.2f}{mark}".replace("-", "$-$"))
     rows.append(f"{label} & " + " & ".join(cells) + " \\\\")
 paired = "\n".join(rows)
-open("means.tex", "w").write(means); open("paired.tex", "w").write(paired)
+open(TAB / "means.tex", "w").write(means); open(TAB / "paired.tex", "w").write(paired)
 print("cells significant: seed-level", n_seed, "| two-level", n_two, "of", 4 * len(rows))
 
 # ---- equivalence-margin table
@@ -49,7 +52,7 @@ for key, label in eq_pairs:
         v = f"{r['min_margin']:.2f}"; v = f"\\textbf{{{v}}}" if r["min_margin"] <= 1.0 else v
         cells.append(v + ("$^\\dagger$" if r["p_tost_holm"] < 0.05 else ""))
     rows.append(f"{label} & " + " & ".join(cells) + " \\\\")
-open("equiv.tex", "w").write("\n".join(rows))
+open(TAB / "equiv.tex", "w").write("\n".join(rows))
 # ---- seed budget table (overall and by effect size)
 S = J["sign_stability"]; ks = (3, 6, 10)
 cells = [c for v in S.values() for c in v]
@@ -65,7 +68,7 @@ rows = [f"All {len(cells)} cells & " + fmt(cells) + " \\\\",
         f"$|\\Delta|\\ge0.5$ ({len(big)} cells) & " + fmt(big) + " \\\\",
         f"$|\\Delta|<0.3$ ({len(small)} cells) & " + fmt(small) + " \\\\",
         "Any two-level significant cell (mean) & " + " & ".join(f"{x:.2f}" for x in anysig) + " \\\\"]
-open("budget.tex", "w").write("\n".join(rows))
+open(TAB / "budget.tex", "w").write("\n".join(rows))
 print("equiv and budget tables written; flips in original six seeds:", sum(c["sign_flips_in_orig6"] for c in cells), "of", len(cells), "| strata", len(big), len(small))
 
 # ---- MAE / PHM table
@@ -76,7 +79,7 @@ for m, label in mm:
     mae = " & ".join(f"{d[fd]['mae_mean']:.2f}{{\\tiny$\\pm${d[fd]['mae_sd']:.2f}}}" for fd in DS)
     phm = " & ".join(f"{d[fd]['phm_mean']:.0f}" for fd in DS)
     rows.append(f"{label} & {mae} & {phm} \\\\")
-open("metrics.tex", "w").write("\n".join(rows))
+open(TAB / "metrics.tex", "w").write("\n".join(rows))
 
 # ---- full p-value table (seed-level | two-level, Holm)
 def fp(p): return "$<$0.001" if p < 0.001 else f"{p:.3f}"
@@ -89,4 +92,4 @@ for key, label in pairs:
         sa = f"\\textbf{{{fp(a)}}}" if a < 0.05 else fp(a); sc = f"\\textbf{{{fp(c)}}}" if c < 0.05 else fp(c)
         cells.append(f"{sa} / {sc}")
     rows.append(f"{label} & " + " & ".join(cells) + " \\\\")
-open("pvals.tex", "w").write("\n".join(rows))
+open(TAB / "pvals.tex", "w").write("\n".join(rows))

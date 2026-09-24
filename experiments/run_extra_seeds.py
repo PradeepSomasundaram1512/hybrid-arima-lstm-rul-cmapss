@@ -3,7 +3,7 @@ Extend every comparison from 6 to 20 seeds, restore the order-selected per-engin
 that were not archived for the original 6 seeds, and add the capacity controls for all seeds.
 
 Run from the repository root AFTER the feature caches exist (results/_feature_cache), e.g.
-    python3 code/run_extra_seeds.py --workers 4
+    python3 experiments/run_extra_seeds.py --workers 4
 
 Resumable: a stage is skipped when its output already exists.
 
@@ -25,7 +25,7 @@ STAGES = {   # name -> (script, output that marks completion)
     "capacity":       ("run_capacity_controls.py",       "results/capacity_controls/{fd}/seed_{s}/raw_predictions.json"),
     "cnn":            ("run_cnn_lstm_baseline.py",       "results/cnn_lstm/{fd}/seed_{s}/raw_predictions.json"),
 }
-os.makedirs("logs", exist_ok=True)
+os.makedirs("results/logs", exist_ok=True)
 
 
 def stored_rmse(fd, s):
@@ -42,8 +42,8 @@ def run_job(job):
         if os.path.exists(out.format(fd=fd, s=s)): continue
         before = stored_rmse(fd, s) if (st == "order_selected" and s in OLD_SEEDS) else None
         t0 = time.time()
-        with open(f"logs/{st}_{fd}_{s}.log", "w") as lf:
-            r = subprocess.run([sys.executable, f"code/{script}", fd, str(s)], stdout=lf, stderr=subprocess.STDOUT, env=env)
+        with open(f"results/logs/{st}_{fd}_{s}.log", "w") as lf:
+            r = subprocess.run([sys.executable, f"experiments/{script}", fd, str(s)], stdout=lf, stderr=subprocess.STDOUT, env=env)
         ok = r.returncode == 0 and os.path.exists(out.format(fd=fd, s=s))
         note = ""
         if ok and before:
@@ -51,7 +51,7 @@ def run_job(job):
             diff = max(abs(after[k] - before[k]) for k in before)
             note = f" (max |RMSE change| vs stored: {diff:.2e})"
             json.dump({"before": before, "after": after, "max_abs_diff": diff},
-                      open(f"logs/restore_check_{fd}_{s}.json", "w"))
+                      open(f"results/logs/restore_check_{fd}_{s}.json", "w"))
         print(f"[{time.strftime('%H:%M:%S')}] {fd} seed {s} {st}: {'ok' if ok else 'FAILED'} in {time.time()-t0:.0f}s{note}", flush=True)
         if not ok: return False
     return True

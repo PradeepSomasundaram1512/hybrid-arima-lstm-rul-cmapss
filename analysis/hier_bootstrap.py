@@ -8,7 +8,7 @@ report a variance-components (ANOVA) t-interval with Satterthwaite degrees of fr
 use the more conservative of the two for equivalence claims.
 
 Statistic: mean over seeds and engines of |err|_A - |err|_B.
-Run from the repository root: python3 code/hier_bootstrap.py
+Run from the repository root: python3 analysis/hier_bootstrap.py
 """
 import json, itertools, warnings
 import numpy as np

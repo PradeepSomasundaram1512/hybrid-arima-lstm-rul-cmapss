@@ -14,3 +14,5 @@ results/_feature_cache/*.parquet
 presentation/
 archive_old_versions/
 submission_ready/
+# LaTeX build output (the final PDFs are tracked under their own names)
+manuscript/**/main.pdf

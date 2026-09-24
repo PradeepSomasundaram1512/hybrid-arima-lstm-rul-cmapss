@@ -28,7 +28,7 @@ def rmse_table():
 
 R = rmse_table()
 plt.rcParams.update({"font.size": 7, "font.family": "serif"})
-os.makedirs("figures", exist_ok=True)
+os.makedirs("manuscript/icaiet2027/figures", exist_ok=True)
 cols = {"Plain": "#444444", "Fixed ARIMA": "#c0504d", "AIC ARIMA": "#8064a2", "Causal ARIMA": "#e69138", "Moving avg": "#4f81bd", "Exp. smooth": "#76a5af", "Dup. channel": "#999999"}
 
 # Fig A: paired per-seed RMSE differences vs plain
@@ -43,7 +43,7 @@ for ax, fd in zip(axes, DS):
     ax.axhline(0, color="gray", lw=0.6, ls="--"); ax.set_title(fd)
     ax.set_xticks(range(len(variants))); ax.set_xticklabels(variants, rotation=60, ha="right")
 axes[0].set_ylabel("RMSE minus plain (cycles)")
-plt.tight_layout(); plt.savefig("figures/fig_paired20.pdf"); plt.savefig("figures/fig_paired20.png", dpi=200); plt.close()
+plt.tight_layout(); plt.savefig("manuscript/icaiet2027/figures/fig_paired20.pdf"); plt.savefig("manuscript/icaiet2027/figures/fig_paired20.png", dpi=200); plt.close()
 
 # Fig B: cumulative mean of (fixed ARIMA - plain) as seeds are added in the original order
 fig, axes = plt.subplots(1, 2, figsize=(7.2, 2.2))
@@ -54,7 +54,7 @@ for ax, (v, title) in zip(axes, [("Fixed ARIMA", "Fixed-order ARIMA hybrid minus
     ax.axhline(0, color="gray", lw=0.6, ls="--"); ax.axvspan(0.5, 3.5, color="#eeeeee", zorder=0); ax.axvline(6.5, color="gray", lw=0.6, ls=":")
     ax.set_xlabel("number of seeds averaged"); ax.set_title(title); ax.set_xticks([1, 3, 6, 10, 15, 20])
 axes[0].set_ylabel("mean RMSE difference (cycles)"); axes[0].legend(ncol=2, frameon=False)
-plt.tight_layout(); plt.savefig("figures/fig_cumulative.pdf"); plt.savefig("figures/fig_cumulative.png", dpi=200); plt.close()
+plt.tight_layout(); plt.savefig("manuscript/icaiet2027/figures/fig_cumulative.pdf"); plt.savefig("manuscript/icaiet2027/figures/fig_cumulative.png", dpi=200); plt.close()
 
 # Fig C: means +- sd over 20 seeds
 models = ["Plain", "Fixed ARIMA", "AIC ARIMA", "Causal ARIMA", "Moving avg"]
@@ -64,5 +64,5 @@ for i, m in enumerate(models):
     ax.bar(np.arange(4) + (i - 2) * w, mu, w, yerr=sd, color=cols[m], capsize=1.5, error_kw={"lw": 0.7}, label=m)
 ax.set_ylim(12, 17); ax.set_xticks(range(4)); ax.set_xticklabels(DS); ax.set_ylabel("test RMSE (cycles)")
 ax.legend(fontsize=5.5, ncol=2, frameon=False, loc="upper left")
-plt.tight_layout(); plt.savefig("figures/fig_means20.pdf"); plt.savefig("figures/fig_means20.png", dpi=200); plt.close()
+plt.tight_layout(); plt.savefig("manuscript/icaiet2027/figures/fig_means20.pdf"); plt.savefig("manuscript/icaiet2027/figures/fig_means20.png", dpi=200); plt.close()
 print("saved figures: fig_paired20, fig_cumulative, fig_means20")

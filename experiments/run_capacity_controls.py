@@ -9,7 +9,7 @@ extra information (the trend) AND a wider input / more parameters. These two con
 
 Same preprocessing, windowing, validation split, training protocol and seeds as every other run.
 
-Usage: python3 code/run_capacity_controls.py FD001 [seed]
+Usage: python3 experiments/run_capacity_controls.py FD001 [seed]
 """
 import sys
 import os
