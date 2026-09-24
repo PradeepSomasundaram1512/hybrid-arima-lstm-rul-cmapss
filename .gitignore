@@ -8,3 +8,6 @@ __pycache__/
 compile1.log
 compile2.log
 _arima_cache_*.parquet
+logs/
+results/_feature_cache/*.parquet
+*.orig

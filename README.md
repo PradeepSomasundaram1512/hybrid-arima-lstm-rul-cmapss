@@ -1,61 +1,50 @@
-# A Hybrid ARIMA-LSTM Framework for Remaining Useful Life Prediction
+# Reliable Evaluation of ARIMA-LSTM Hybrids for Remaining Useful Life Prediction
 
-Code, data, and results for the paper *"A Hybrid ARIMA-LSTM Framework for Remaining Useful Life Prediction in Industrial IoT Sensor Data: A Cross-Regime Study on NASA C-MAPSS"*, submitted to the 11th IEEE Special Session on Machine Learning on Big Data (MLBD 2026), IEEE BigData 2026.
+Code, data, and per-seed results for *"Reliable Evaluation of ARIMA-LSTM Hybrids for Remaining Useful Life Prediction: A Multi-Seed, Specification-Sensitive Study on NASA C-MAPSS"*, accepted at ICAIET-2027 (Machine Learning and Data Science track).
 
 ## What this is
 
-We test whether augmenting an LSTM with a per-sensor ARIMA trend feature improves remaining useful life (RUL) prediction on NASA's C-MAPSS turbofan degradation benchmark. Averaged over six random seeds across all four C-MAPSS sub-datasets, a fixed-order trend feature does not help, and we document how the specific significant result changed as we moved from three seeds to six. Under a per-channel, AIC-selected ARIMA order, the picture changes: the hybrid model significantly and consistently beats the plain LSTM on FD002. A second, architecturally unrelated CNN-LSTM baseline shows the same dataset-dependent pattern rather than a uniform result. We also tested a gated-fusion mechanism (a learned per-channel gate on the trend feature, in place of naive concatenation) as a direct fix for the concatenation-noise hypothesis raised in our own Discussion; at full six-seed power it does not produce a significant improvement over either the plain LSTM or the selected-order hybrid on any dataset, a null result we report alongside the positive ones. See `paper.pdf` for the full writeup.
+We evaluate, rather than propose, ARIMA trend augmentation for LSTM-based remaining useful life (RUL) prediction on all four NASA C-MAPSS sub-datasets. Three ARIMA specifications are compared against a plain LSTM (and Random Forest and CNN-LSTM baselines): a fixed order, an AIC-selected order (both fit on each unit's full series, hence non-causal), and a fully causal expanding-window construction that never uses observations after the predicted cycle.
+
+Main findings, from the six-seed study reported in the paper:
+
+- No specification yields a corrected-significant improvement of the hybrid over the plain LSTM on any dataset.
+- Conclusions moved with seed count: a significant three-seed result on FD001 disappeared at six seeds.
+- A free, fitting-free causal moving average matches or beats the far more expensive causal ARIMA feature (about 2,000 times cheaper to construct).
+- The two engine-level significant results in the paper (fixed-order hybrid worse than plain on FD004; moving average better than causal ARIMA on FD002) are nominal only under a two-level seeds-by-engines test (`code/hier_bootstrap.py`).
+
+An earlier version of this README claimed the hybrid significantly beats the plain LSTM on FD002. That claim predates multiple-comparison correction, does not hold, and has been removed.
 
 ## Repository layout
 
-- `paper.pdf`, `paper.tex`, `IEEEtran.cls` — the paper and its LaTeX source
-- `code/` — the full experimental pipeline
-  - `run_dataset.py` — main pipeline (fixed ARIMA(1,1,0), per dataset/seed)
-  - `run_dataset_order_selected.py` — AIC-based per-channel ARIMA order selection variant
-  - `run_cnn_lstm_baseline.py` — CNN-LSTM baseline (no ARIMA feature), per dataset/seed
-  - `run_gated_fusion.py` — gated-fusion hybrid (learned gate on the AIC-selected trend feature), per dataset/seed
-  - `ablation_window.py` — window-length ablation on FD001
-  - `aggregate_seeds.py`, `aggregate_ablation.py`, `aggregate_order_selected.py`, `aggregate_cnn_lstm.py`, `aggregate_gated_fusion.py` — result aggregation and significance testing
-  - `analyze_cnn_lstm_significance.py`, `analyze_gated_fusion_significance.py` — paired Wilcoxon tests against plain LSTM and the selected-order hybrid
-  - `analyze_compute_cost.py` — runtime and parameter-count overhead of ARIMA order selection
-  - `make_multiseed_figures.py`, `make_ablation_figure.py`, `statistical_analysis.py` — figure generation
-- `data/` — the real NASA C-MAPSS FD001-FD004 train/test data (parquet), sourced from [LucasThil's Hugging Face mirror](https://huggingface.co/datasets/LucasThil/nasa_turbofan_degradation_FD001) of the original NASA Prognostics Center of Excellence dataset
-- `results/` — every raw result: per-seed predictions and metrics for all 4 datasets x 6 seeds each for the main comparison, the order-selection runs, the CNN-LSTM baseline, the gated-fusion runs, and the (6-seed) window-length ablation runs
-- `figures/` — all paper figures (PDF + PNG)
+- `paper_icaiet_camera_ready.pdf/.tex` : the 6-page accepted paper. `paper.pdf/.tex` : the full-length technical report (all ablations and negative results).
+- `code/`
+  - `run_dataset.py` (fixed-order hybrid, plain LSTM, Random Forest), `run_dataset_order_selected.py` (AIC-selected order), `run_dataset_causal.py` (causal expanding-window ARIMA), `run_trend_controls.py` (moving-average and exponential-smoothing features), `run_capacity_controls.py` (parameter-matched and duplicated-channel plain LSTMs), `run_cnn_lstm_baseline.py`, `run_gated_fusion.py`, `ablation_window.py`
+  - `feature_cache.py` : dataset-level cache of ARIMA features, guarded by a fingerprint of the normalised data
+  - `run_extra_seeds.py` : runs every variant for additional seeds (resumable)
+  - `equiv_seedbudget.py`, `hier_bootstrap.py`, `analysis_extended.py` : equivalence tests, two-level bootstrap, seed-budget analysis
+  - `timing_feature_construction.py` : controlled CPU-time comparison of feature constructions
+  - `aggregate_*.py`, `analyze_*.py`, `make_*_figures.py`, `statistical_analysis.py` : aggregation and figures
+- `data/` : NASA C-MAPSS FD001-FD004 (parquet), from [LucasThil's Hugging Face mirror](https://huggingface.co/datasets/LucasThil/nasa_turbofan_degradation_FD001) of the NASA Prognostics Center of Excellence data
+- `results/` : per-seed metrics and per-engine predictions for every variant
+- `requirements.txt`, `reproduce.sh` : exact package versions and the full reproduction sequence
 
-## Reproducing a result
+## Reproducing
 
 ```bash
 python3 -m venv venv && source venv/bin/activate
-pip install pandas numpy scikit-learn statsmodels torch matplotlib scipy pyarrow
-
-# Main comparison for one dataset/seed:
-python3 code/run_dataset.py FD001 42
-
-# ARIMA order-selection variant:
-python3 code/run_dataset_order_selected.py FD002 42
-
-# CNN-LSTM baseline (no ARIMA feature):
-python3 code/run_cnn_lstm_baseline.py FD002 42
-
-# Gated-fusion hybrid (learned gate on the AIC-selected trend feature):
-python3 code/run_gated_fusion.py FD002 42
-
-# Window-length ablation (FD001 only):
-python3 code/ablation_window.py 42
-
-# Aggregate across seeds and run significance tests:
-python3 code/aggregate_seeds.py
-python3 code/aggregate_ablation.py
-python3 code/aggregate_order_selected.py
-python3 code/aggregate_cnn_lstm.py
-python3 code/aggregate_gated_fusion.py
-python3 code/analyze_cnn_lstm_significance.py
-python3 code/analyze_gated_fusion_significance.py
-python3 code/analyze_compute_cost.py
+pip install -r requirements.txt          # exact versions used for every result
+python3 code/run_dataset.py FD001 42     # one dataset and seed
+./reproduce.sh                            # everything (hours)
 ```
 
-All random seeds, hyperparameters, and preprocessing choices are documented in the paper (Table I) and reproduced exactly in the code above — there is no hidden configuration.
+With the pinned versions on CPU, reruns reproduce the archived RMSE values exactly (verified for FD001 seeds 42 and 123, including with a different thread count). The causal ARIMA feature costs about 222 ms of CPU per series against 0.10 ms for the moving average, so features are computed once per dataset and reused across seeds; reuse is guarded by a SHA-256 fingerprint of the normalised series and is rejected if the data differ.
+
+## Known limitations
+
+- Six seeds is moderate power; seed variation dominates the uncertainty of every comparison (see `results/hier_bootstrap.json`).
+- C-MAPSS is simulated data; generalisation to real industrial streams is untested.
+- The original order-selected sweep did not archive per-engine predictions; they are being regenerated (`code/run_extra_seeds.py`).
 
 ## Disclosure
 

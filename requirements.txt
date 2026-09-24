@@ -1,0 +1,8 @@
+# Exact versions used for every reported result (Python 3.13.5, CPU-only, Apple M2 Pro)
+torch==2.14.0
+scikit-learn==1.9.1
+statsmodels==0.15.0
+scipy==1.18.1
+pandas==3.0.6
+numpy==2.5.3
+pyarrow

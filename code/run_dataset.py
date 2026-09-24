@@ -20,6 +20,7 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 warnings.simplefilter("ignore", ConvergenceWarning)
 warnings.simplefilter("ignore", UserWarning)
+from feature_cache import load_or_build
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
@@ -93,6 +94,8 @@ train_raw[feature_cols] = train_raw[feature_cols].clip(-6, 6)
 test_raw[feature_cols] = test_raw[feature_cols].clip(-6, 6)
 
 # ---------- 4. ARIMA trend-feature extraction per unit per sensor ----------
+CNT = {"series": 0, "fits": 0, "nonconverged": 0, "fallback": 0}
+
 def arima_trend_features(df, feature_cols, order=(1, 1, 0)):
     out = df.copy()
     for col in feature_cols:
@@ -105,29 +108,29 @@ def arima_trend_features(df, feature_cols, order=(1, 1, 0)):
         g = df.loc[idx]
         for col in feature_cols:
             series = g[col].values
+            CNT["series"] += 1
             try:
                 model = ARIMA(series, order=order)
                 fit = model.fit()
+                CNT["fits"] += 1; CNT["nonconverged"] += int(not fit.mle_retvals.get("converged", True))
                 fitted = fit.predict(start=0, end=len(series) - 1)
             except Exception:
+                CNT["fallback"] += 1
                 fitted = pd.Series(series).rolling(5, min_periods=1).mean().values
             out.loc[idx, f"{col}_trend"] = fitted
         if (i + 1) % 50 == 0:
             print(f"  ARIMA trend extraction: {i+1}/{n_units} units done ({time.time()-t0:.1f}s)")
     return out
 
-print("Fitting per-unit-per-sensor ARIMA trend models (train)...")
-train_arima = arima_trend_features(train_raw, feature_cols)
-print("Fitting per-unit-per-sensor ARIMA trend models (test)...")
-test_arima = arima_trend_features(test_raw, feature_cols)
+train_arima, test_arima, _cnt, _hit = load_or_build("fixed", FD, train_raw, test_raw, feature_cols,
+                                                     lambda d: arima_trend_features(d, feature_cols), lambda: dict(CNT))
+CNT.update(_cnt)
 
 trend_cols = [f"{c}_trend" for c in feature_cols]
 train_arima[trend_cols] = train_arima[trend_cols].bfill().ffill()
 test_arima[trend_cols] = test_arima[trend_cols].bfill().ffill()
 print(f"ARIMA stage done at {time.time()-t_start:.1f}s")
 
-train_arima.to_parquet(f"{OUT_DIR}/_arima_cache_train.parquet")
-test_arima.to_parquet(f"{OUT_DIR}/_arima_cache_test.parquet")
 
 # ---------- 5. Windowing ----------
 hybrid_feats = feature_cols + trend_cols
@@ -281,7 +284,7 @@ summary["_meta"] = {
     "n_val_units": len(val_units),
     "n_test_units": len(test_units),
     "n_train_windows": int(Xtr_raw.shape[0]),
-    "runtime_sec": time.time() - t_start,
+    "runtime_sec": time.time() - t_start, "arima_counters": CNT,
 }
 
 with open(f"{OUT_DIR}/summary_metrics.json", "w") as f:

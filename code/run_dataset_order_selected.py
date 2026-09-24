@@ -20,6 +20,7 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 warnings.simplefilter("ignore", ConvergenceWarning)
 warnings.simplefilter("ignore", UserWarning)
+from feature_cache import load_or_build
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
@@ -95,6 +96,7 @@ test_raw[feature_cols] = test_raw[feature_cols].clip(-6, 6)
 # ---------- 4. ARIMA trend-feature extraction per unit per sensor, WITH per-channel order selection ----------
 CANDIDATE_ORDERS = [(1, 1, 0), (0, 1, 1), (1, 1, 1), (2, 1, 0)]
 order_choice_counts = {}
+CNT = {"series": 0, "fits": 0, "nonconverged": 0, "fallback": 0}
 
 def arima_trend_features_order_selected(df, feature_cols, candidate_orders=CANDIDATE_ORDERS):
     out = df.copy()
@@ -108,12 +110,14 @@ def arima_trend_features_order_selected(df, feature_cols, candidate_orders=CANDI
         g = df.loc[idx]
         for col in feature_cols:
             series = g[col].values
+            CNT["series"] += 1
             best_aic = np.inf
             best_fitted = None
             best_order = None
             for order in candidate_orders:
                 try:
                     fit = ARIMA(series, order=order).fit()
+                    CNT["fits"] += 1; CNT["nonconverged"] += int(not fit.mle_retvals.get("converged", True))
                     if fit.aic < best_aic:
                         best_aic = fit.aic
                         best_fitted = fit.predict(start=0, end=len(series) - 1)
@@ -129,10 +133,11 @@ def arima_trend_features_order_selected(df, feature_cols, candidate_orders=CANDI
             print(f"  ARIMA order-selected trend extraction: {i+1}/{n_units} units done ({time.time()-t0:.1f}s)")
     return out
 
-print("Fitting per-unit-per-sensor ARIMA trend models with order selection (train)...")
-train_arima = arima_trend_features_order_selected(train_raw, feature_cols)
-print("Fitting per-unit-per-sensor ARIMA trend models with order selection (test)...")
-test_arima = arima_trend_features_order_selected(test_raw, feature_cols)
+train_arima, test_arima, _cnt, _hit = load_or_build("order_selected", FD, train_raw, test_raw, feature_cols,
+    lambda d: arima_trend_features_order_selected(d, feature_cols),
+    lambda: dict(CNT, order_choice_counts={str(k): v for k, v in order_choice_counts.items()}))
+CNT.update({k: v for k, v in _cnt.items() if k in CNT})
+order_choice_counts.clear(); order_choice_counts.update(_cnt["order_choice_counts"])
 print("Order selection counts (train+test combined):", order_choice_counts)
 
 trend_cols = [f"{c}_trend" for c in feature_cols]
@@ -140,8 +145,6 @@ train_arima[trend_cols] = train_arima[trend_cols].bfill().ffill()
 test_arima[trend_cols] = test_arima[trend_cols].bfill().ffill()
 print(f"ARIMA stage done at {time.time()-t_start:.1f}s")
 
-train_arima.to_parquet(f"{OUT_DIR}/_arima_cache_train.parquet")
-test_arima.to_parquet(f"{OUT_DIR}/_arima_cache_test.parquet")
 
 # ---------- 5. Windowing ----------
 hybrid_feats = feature_cols + trend_cols
@@ -295,7 +298,7 @@ summary["_meta"] = {
     "n_val_units": len(val_units),
     "n_test_units": len(test_units),
     "n_train_windows": int(Xtr_raw.shape[0]),
-    "runtime_sec": time.time() - t_start,
+    "runtime_sec": time.time() - t_start, "arima_counters": CNT,
     "order_choice_counts": {str(k): v for k, v in order_choice_counts.items()},
 }
 

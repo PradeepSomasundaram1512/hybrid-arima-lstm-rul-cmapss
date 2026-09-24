@@ -42,6 +42,7 @@ from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tools.sm_exceptions import ConvergenceWarning
 warnings.simplefilter("ignore", ConvergenceWarning)
 warnings.simplefilter("ignore", UserWarning)
+from feature_cache import load_or_build
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
@@ -115,6 +116,13 @@ test_raw[feature_cols] = test_raw[feature_cols].clip(-6, 6)
 # ---------- 4. CAUSAL ARIMA trend-feature extraction per unit per sensor ----------
 n_fallback = 0
 n_total_series = 0
+CNT = {"series": 0, "fits": 0, "nonconverged": 0, "fallback": 0}
+
+def _fit(x, order):
+    r = ARIMA(x, order=order).fit()
+    CNT["fits"] += 1
+    CNT["nonconverged"] += int(not r.mle_retvals.get("converged", True))
+    return r
 
 def causal_arima_trend(series, order=(1, 1, 0)):
     global n_fallback, n_total_series
@@ -127,12 +135,12 @@ def causal_arima_trend(series, order=(1, 1, 0)):
         return fitted
     try:
         b = REFIT_BURNIN
-        cur_fit = ARIMA(series[:b], order=order).fit()
+        cur_fit = _fit(series[:b], order)
         fitted[:b] = cur_fit.predict(start=0, end=b - 1)
         last_refit_t = b - 1  # index of last cycle used to (re)estimate params
         for t in range(b, L):
             if (t - last_refit_t) >= REFIT_STRIDE:
-                cur_fit = ARIMA(series[:t + 1], order=order).fit()
+                cur_fit = _fit(series[:t + 1], order)
                 fitted[t] = cur_fit.predict(start=t, end=t)[0]
                 last_refit_t = t
             else:
@@ -162,10 +170,11 @@ def arima_trend_features_causal(df, feature_cols, order=(1, 1, 0)):
             print(f"  causal ARIMA extraction: {i+1}/{n_units} units done ({time.time()-t0:.1f}s)")
     return out
 
-print("Fitting CAUSAL per-unit-per-sensor ARIMA trend models (train)...")
-train_arima = arima_trend_features_causal(train_raw, feature_cols)
-print("Fitting CAUSAL per-unit-per-sensor ARIMA trend models (test)...")
-test_arima = arima_trend_features_causal(test_raw, feature_cols)
+train_arima, test_arima, _cnt, _hit = load_or_build("causal", FD, train_raw, test_raw, feature_cols,
+    lambda d: arima_trend_features_causal(d, feature_cols),
+    lambda: dict(CNT, n_fallback=n_fallback, n_total_series=n_total_series))
+CNT.update({k: v for k, v in _cnt.items() if k in CNT})
+n_fallback, n_total_series = _cnt["n_fallback"], _cnt["n_total_series"]
 print(f"Fallback rate: {n_fallback}/{n_total_series} series ({100*n_fallback/max(n_total_series,1):.2f}%)")
 
 trend_cols = [f"{c}_trend" for c in feature_cols]
@@ -173,8 +182,6 @@ train_arima[trend_cols] = train_arima[trend_cols].bfill().ffill()
 test_arima[trend_cols] = test_arima[trend_cols].bfill().ffill()
 print(f"Causal ARIMA stage done at {time.time()-t_start:.1f}s")
 
-train_arima.to_parquet(f"{OUT_DIR}/_arima_cache_train.parquet")
-test_arima.to_parquet(f"{OUT_DIR}/_arima_cache_test.parquet")
 
 # ---------- 5. Windowing (identical to run_dataset.py) ----------
 hybrid_feats = feature_cols + trend_cols
@@ -316,7 +323,7 @@ for name, r in results.items():
 summary["_meta"] = {
     "dataset": FD, "seed": SEED, "n_regimes": N_REGIMES,
     "n_train_units": len(tr_units), "n_val_units": len(val_units), "n_test_units": len(test_units),
-    "n_train_windows": int(Xtr_raw.shape[0]), "runtime_sec": time.time() - t_start,
+    "n_train_windows": int(Xtr_raw.shape[0]), "runtime_sec": time.time() - t_start, "arima_counters": CNT,
     "refit_stride": REFIT_STRIDE, "refit_burnin": REFIT_BURNIN,
     "arima_fallback_count": n_fallback, "arima_total_series": n_total_series,
 }
