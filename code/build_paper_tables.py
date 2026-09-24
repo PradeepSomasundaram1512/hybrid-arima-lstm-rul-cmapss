@@ -1,6 +1,7 @@
 """Fill %%MEANS%% and %%PAIRED%% in the template from results/extended_analysis.json (no hand-typed numbers)."""
-import json, sys
-R = "/Users/pradeepsomasundaram/Library/Mobile Documents/com~apple~CloudDocs/Documents/IEEE_BigData_2026_ARIMA_LSTM_Paper/results/extended_analysis.json"
+import json, sys, pathlib
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+R = str(ROOT / "results" / "extended_analysis.json")
 J = json.load(open(R)); DS = ["FD001", "FD002", "FD003", "FD004"]
 
 names = [("plain", "Plain LSTM"), ("noncausal", "Fixed-order ARIMA"), ("order_sel", "AIC-selected ARIMA"), ("causal", "Causal ARIMA"),

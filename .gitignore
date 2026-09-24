@@ -11,3 +11,6 @@ _arima_cache_*.parquet
 logs/
 results/_feature_cache/*.parquet
 *.orig
+presentation/
+archive_old_versions/
+submission_ready/

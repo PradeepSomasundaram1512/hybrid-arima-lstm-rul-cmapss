@@ -1,7 +1,7 @@
-import time, json, warnings, numpy as np, pandas as pd
+import time, json, warnings, pathlib, numpy as np, pandas as pd
 warnings.filterwarnings("ignore")
 from statsmodels.tsa.arima.model import ARIMA
-D="/Users/pradeepsomasundaram/Documents/IEEE_BigData_2026_ARIMA_LSTM_Paper/data/"
+D=str(pathlib.Path(__file__).resolve().parent.parent / "data") + "/"
 REFIT_STRIDE, REFIT_BURNIN = 20, 10
 
 def causal(series, order=(1,1,0)):   # verbatim logic of run_dataset_causal.py
