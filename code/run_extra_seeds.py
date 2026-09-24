@@ -23,6 +23,7 @@ STAGES = {   # name -> (script, output that marks completion)
     "causal":         ("run_dataset_causal.py",          "results/causal/{fd}/seed_{s}/raw_predictions.json"),
     "trend_controls": ("run_trend_controls.py",          "results/trend_controls/{fd}/seed_{s}/raw_predictions.json"),
     "capacity":       ("run_capacity_controls.py",       "results/capacity_controls/{fd}/seed_{s}/raw_predictions.json"),
+    "cnn":            ("run_cnn_lstm_baseline.py",       "results/cnn_lstm/{fd}/seed_{s}/raw_predictions.json"),
 }
 os.makedirs("logs", exist_ok=True)
 
@@ -57,9 +58,12 @@ def run_job(job):
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser(); ap.add_argument("--workers", type=int, default=4); a = ap.parse_args()
-    jobs = [(fd, s, ["main", "order_selected", "causal", "trend_controls", "capacity"]) for s in NEW_SEEDS for fd in DATASETS]
-    jobs += [(fd, s, ["order_selected", "capacity"]) for s in OLD_SEEDS for fd in DATASETS]
+    ap = argparse.ArgumentParser(); ap.add_argument("--workers", type=int, default=4); ap.add_argument("--datasets", nargs="*", default=DATASETS); ap.add_argument("--only", nargs="*", default=None, help="run only these stages, on the new seeds"); a = ap.parse_args()
+    if a.only:
+        jobs = [(fd, s, a.only) for s in NEW_SEEDS for fd in a.datasets]
+    else:
+        jobs = [(fd, s, ["main", "order_selected", "causal", "trend_controls", "capacity"]) for s in NEW_SEEDS for fd in a.datasets]
+        jobs += [(fd, s, ["order_selected", "capacity"]) for s in OLD_SEEDS for fd in a.datasets]
     print(f"{len(jobs)} (dataset, seed) jobs, {a.workers} workers", flush=True)
     with ThreadPoolExecutor(a.workers) as ex:
         res = list(ex.map(run_job, jobs))

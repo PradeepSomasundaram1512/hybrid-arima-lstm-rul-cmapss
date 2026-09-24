@@ -1,0 +1,9 @@
+{
+ "fingerprint": "bd1230b6de7424380a28585bd71085737bad5d9e7c4a498fc91f987a92717e2c",
+ "counters": {
+  "series": 3000,
+  "fits": 3000,
+  "nonconverged": 79,
+  "fallback": 0
+ }
+}

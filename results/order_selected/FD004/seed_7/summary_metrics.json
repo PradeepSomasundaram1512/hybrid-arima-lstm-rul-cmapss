@@ -1,8 +1,8 @@
 {
   "RandomForest_baseline": {
     "RMSE": 20.13250970620566,
-    "MAE": 14.765399745257588,
-    "PHM_score": 3890.209031820167,
+    "MAE": 14.76539974525759,
+    "PHM_score": 3890.2090318201604,
     "n_test": 248
   },
   "Plain_LSTM": {
@@ -25,7 +25,13 @@
     "n_val_units": 37,
     "n_test_units": 248,
     "n_train_windows": 46550,
-    "runtime_sec": 1333.6969258785248,
+    "runtime_sec": 512.8447680473328,
+    "arima_counters": {
+      "series": 10437,
+      "fits": 41748,
+      "nonconverged": 4060,
+      "fallback": 0
+    },
     "order_choice_counts": {
       "(0, 1, 1)": 8560,
       "(1, 1, 1)": 1728,

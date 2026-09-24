@@ -1,0 +1,36 @@
+{
+  "RandomForest_baseline": {
+    "RMSE": 20.014607908956975,
+    "MAE": 14.587635664613972,
+    "PHM_score": 3673.84565659721,
+    "n_test": 248
+  },
+  "Plain_LSTM": {
+    "RMSE": 15.179967695120581,
+    "MAE": 10.386748958979883,
+    "PHM_score": 1320.2283171430413,
+    "n_test": 248
+  },
+  "Hybrid_ARIMA_LSTM": {
+    "RMSE": 15.161017605533536,
+    "MAE": 10.648244736656066,
+    "PHM_score": 1088.655509472267,
+    "n_test": 248
+  },
+  "_meta": {
+    "dataset": "FD004",
+    "seed": 2,
+    "n_regimes": 6,
+    "n_train_units": 212,
+    "n_val_units": 37,
+    "n_test_units": 248,
+    "n_train_windows": 45870,
+    "runtime_sec": 443.9296729564667,
+    "arima_counters": {
+      "series": 10437,
+      "fits": 10437,
+      "nonconverged": 1004,
+      "fallback": 0
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "MA_Hybrid_LSTM": {
+    "RMSE": 15.120290984729449,
+    "MAE": 11.293329238891602,
+    "PHM_score": 1006.730224609375,
+    "n_test": 248
+  },
+  "EMA_Hybrid_LSTM": {
+    "RMSE": 15.356479810424288,
+    "MAE": 11.265409469604492,
+    "PHM_score": 1169.0732421875,
+    "n_test": 248
+  },
+  "_meta": {
+    "dataset": "FD004",
+    "seed": 13,
+    "runtime_sec": 269.38030791282654,
+    "ma_window": 10,
+    "ema_alpha": 0.3,
+    "n_train_windows": 45839
+  }
+}

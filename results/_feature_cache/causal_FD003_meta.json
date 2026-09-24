@@ -1,0 +1,11 @@
+{
+ "fingerprint": "63fe00a1afb42dca64967636da3ddbae653d1368f58fc12b83e289cbe3e580f1",
+ "counters": {
+  "series": 0,
+  "fits": 33120,
+  "nonconverged": 2222,
+  "fallback": 0,
+  "n_fallback": 0,
+  "n_total_series": 3200
+ }
+}

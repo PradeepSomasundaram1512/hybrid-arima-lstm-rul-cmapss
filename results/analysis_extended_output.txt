@@ -1,0 +1,248 @@
+=== descriptives: mean +- sd over available seeds (RMSE) ===
+plain      FD001:14.26+-0.64(n=20)  FD002:14.75+-0.62(n=20)  FD003:14.36+-1.30(n=20)  FD004:15.05+-0.29(n=20)
+noncausal  FD001:14.63+-1.15(n=20)  FD002:14.39+-0.53(n=20)  FD003:14.99+-0.72(n=20)  FD004:15.52+-0.48(n=20)
+order_sel  FD001:15.00+-1.00(n=20)  FD002:13.75+-0.79(n=20)  FD003:14.61+-0.86(n=20)  FD004:14.75+-0.56(n=20)
+causal     FD001:14.81+-0.88(n=20)  FD002:14.44+-0.46(n=20)  FD003:14.56+-0.67(n=20)  FD004:15.48+-0.45(n=20)
+ma         FD001:14.25+-0.72(n=20)  FD002:14.06+-0.43(n=20)  FD003:14.84+-0.71(n=20)  FD004:14.75+-0.58(n=20)
+ema        FD001:14.56+-0.98(n=20)  FD002:14.23+-0.61(n=20)  FD003:14.76+-0.96(n=20)  FD004:15.12+-0.47(n=20)
+pm_plain   FD001:14.54+-0.70(n=20)  FD002:14.62+-0.47(n=20)  FD003:14.31+-0.74(n=20)  FD004:15.08+-0.50(n=20)
+dup_plain  FD001:14.52+-0.82(n=20)  FD002:14.85+-0.55(n=20)  FD003:14.81+-1.01(n=20)  FD004:15.55+-0.49(n=20)
+cnn_lstm   FD001:14.47+-0.59(n=6)  FD002:15.11+-1.05(n=6)  FD003:13.90+-0.70(n=6)  FD004:14.86+-0.54(n=6)
+gated      FD001:14.97+-0.74(n=6)  FD002:13.93+-0.35(n=6)  FD003:14.33+-0.90(n=6)  FD004:15.03+-0.47(n=6)
+
+=== paired comparisons (A minus B; negative favours A). p: seed-level Wilcoxon | two-level (larger of variance-components, bootstrap), Holm across 4 datasets ===
+
+noncausal vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.30  +0.37  1.10       0.3118      0.7461        0.84  equivalent
+  FD002  20  -0.19  -0.36  0.87       0.0983      0.7461        0.57  equivalent
+  FD003  20  +0.53  +0.64  1.38       0.0983      0.4226        1.07  inconclusive
+  FD004  20  +0.23  +0.48  0.63       0.0079      0.7461        0.59  equivalent
+
+causal vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.41  +0.55  0.93       0.0645      0.7878        0.95  equivalent
+  FD002  20  +0.04  -0.31  0.83       0.3299      1.0000        0.43  equivalent
+  FD003  20  +0.05  +0.21  1.44       0.4524      1.0000        0.57  equivalent
+  FD004  20  +0.23  +0.44  0.49       0.0028      0.7878        0.57  equivalent
+
+order_sel vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.35  +0.74  1.23       0.0408      1.0000        1.36  inconclusive
+  FD002  20  -0.71  -1.00  0.80       0.0004      0.3132        1.43  inconclusive
+  FD003  20  -0.21  +0.25  1.42       0.4980      1.0000        0.94  inconclusive
+  FD004  20  -0.62  -0.30  0.74       0.0969      0.2888        1.16  inconclusive
+
+order_sel vs noncausal
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.05  +0.37  1.39       0.2108      0.9434        1.01  inconclusive
+  FD002  20  -0.52  -0.64  0.92       0.0249      0.4030        1.20  inconclusive
+  FD003  20  -0.74  -0.39  0.95       0.2108      0.1920        1.39  inconclusive
+  FD004  20  -0.86  -0.78  0.68       0.0008      0.0054        1.33  different
+
+ma vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  -0.08  -0.01  0.93       0.8695      0.8727        0.84  inconclusive
+  FD002  20  -0.42  -0.69  0.80       0.0068      0.6640        0.93  inconclusive
+  FD003  20  +0.35  +0.48  1.37       0.3162      0.8727        0.97  inconclusive
+  FD004  20  -0.25  -0.29  0.67       0.3162      0.8727        0.66  equivalent
+
+ema vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.21  +0.30  1.05       0.6236      1.0000        0.78  equivalent
+  FD002  20  -0.35  -0.52  0.77       0.0169      0.5492        0.73  equivalent
+  FD003  20  +0.33  +0.41  0.98       0.2691      0.9580        0.85  equivalent
+  FD004  20  +0.03  +0.08  0.60       0.6236      1.0000        0.38  equivalent
+
+ma vs causal
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  -0.49  -0.56  0.98       0.0385      0.4513        1.16  inconclusive
+  FD002  20  -0.46  -0.38  0.64       0.0283      0.3489        0.94  inconclusive
+  FD003  20  +0.30  +0.27  0.82       0.0696      0.4513        0.81  equivalent
+  FD004  20  -0.48  -0.73  0.67       0.0003      0.1888        0.89  inconclusive
+
+cnn_lstm vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001   6  -0.02  +0.04  1.08       1.0000      1.0000        0.92  inconclusive
+  FD002   6  +0.71  +0.52  0.70       0.3750      0.1663        1.27  inconclusive
+  FD003   6  -0.72  -0.82  2.02       1.0000      1.0000        2.14  inconclusive
+  FD004   6  +0.01  -0.07  0.67       1.0000      1.0000        0.53  equivalent
+
+gated vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001   6  +0.25  +0.54  1.29       1.0000      1.0000        1.51  inconclusive
+  FD002   6  -0.30  -0.66  0.71       0.2500      1.0000        1.14  inconclusive
+  FD003   6  -0.62  -0.39  1.41       1.0000      1.0000        1.67  inconclusive
+  FD004   6  -0.42  +0.11  0.63       1.0000      1.0000        1.11  inconclusive
+
+noncausal vs pm_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.12  +0.09  1.13       0.8695      0.7211        0.64  equivalent
+  FD002  20  -0.30  -0.23  0.57       0.1946      0.3634        0.63  equivalent
+  FD003  20  +0.62  +0.69  0.87       0.0108      0.1820        1.10  inconclusive
+  FD004  20  +0.22  +0.45  0.67       0.0219      0.5850        0.57  equivalent
+
+causal vs pm_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.23  +0.27  0.75       0.4609      1.0000        0.71  equivalent
+  FD002  20  -0.08  -0.18  0.51       0.4609      1.0000        0.41  equivalent
+  FD003  20  +0.13  +0.26  0.91       0.4609      1.0000        0.61  equivalent
+  FD004  20  +0.22  +0.41  0.60       0.0256      1.0000        0.55  equivalent
+
+noncausal vs dup_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.09  +0.11  1.43       1.0000      1.0000        0.65  equivalent
+  FD002  20  -0.46  -0.46  0.65       0.0377      0.0990        0.82  equivalent
+  FD003  20  +0.08  +0.18  1.12       1.0000      1.0000        0.60  equivalent
+  FD004  20  -0.12  -0.02  0.66       1.0000      1.0000        0.49  equivalent
+
+pm_plain vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.18  +0.28  0.86       0.4216      1.0000        0.58  equivalent
+  FD002  20  +0.12  -0.13  0.72       1.0000      1.0000        0.39  equivalent
+  FD003  20  -0.08  -0.05  1.28       1.0000      1.0000        0.60  equivalent
+  FD004  20  +0.01  +0.03  0.54       1.0000      1.0000        0.26  equivalent
+
+dup_plain vs plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.21  +0.26  1.16       0.7833      0.4939        0.71  equivalent
+  FD002  20  +0.28  +0.10  0.90       0.7833      0.4888        0.61  equivalent
+  FD003  20  +0.45  +0.46  1.43       0.7833      0.4888        0.98  equivalent
+  FD004  20  +0.36  +0.50  0.57       0.0057      0.1520        0.64  equivalent
+
+causal vs noncausal
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.11  +0.18  1.06       1.0000      1.0000        0.57  equivalent
+  FD002  20  +0.23  +0.05  0.51       1.0000      0.5376        0.51  equivalent
+  FD003  20  -0.49  -0.43  0.78       0.0687      0.2270        0.91  equivalent
+  FD004  20  -0.01  -0.04  0.66       1.0000      1.0000        0.27  equivalent
+
+ma vs order_sel
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  -0.42  -0.75  1.19       0.0958      0.7574        1.19  inconclusive
+  FD002  20  +0.29  +0.31  0.96       0.1087      0.7574        0.85  inconclusive
+  FD003  20  +0.55  +0.23  1.28       0.7768      0.7574        1.24  inconclusive
+  FD004  20  +0.37  +0.00  0.71       0.9273      0.7574        0.84  inconclusive
+
+ma vs noncausal
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  -0.38  -0.38  1.19       0.3537      1.0000        1.06  inconclusive
+  FD002  20  -0.23  -0.33  0.69       0.0719      1.0000        0.69  equivalent
+  FD003  20  -0.18  -0.16  0.90       0.5958      1.0000        0.69  equivalent
+  FD004  20  -0.49  -0.77  0.64       0.0001      0.1988        0.91  equivalent
+
+order_sel vs pm_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.16  +0.46  1.23       0.2108      1.0000        1.17  inconclusive
+  FD002  20  -0.82  -0.87  0.96       0.0108      0.2294        1.55  inconclusive
+  FD003  20  -0.12  +0.30  0.92       0.2108      1.0000        0.81  inconclusive
+  FD004  20  -0.64  -0.33  0.70       0.0645      0.2294        1.18  inconclusive
+
+order_sel vs dup_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.14  +0.49  1.34       0.2858      0.8211        1.09  inconclusive
+  FD002  20  -0.98  -1.10  1.01       0.0016      0.0678        1.69  inconclusive
+  FD003  20  -0.66  -0.20  1.29       0.6215      0.2919        1.39  inconclusive
+  FD004  20  -0.98  -0.80  0.81       0.0016      0.0300        1.55  different
+
+ma vs pm_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  -0.26  -0.29  0.75       0.1595      0.7269        0.98  inconclusive
+  FD002  20  -0.54  -0.56  0.66       0.0108      0.2954        1.04  inconclusive
+  FD003  20  +0.43  +0.53  1.07       0.1595      0.7269        1.04  inconclusive
+  FD004  20  -0.27  -0.32  0.65       0.1595      0.7269        0.67  equivalent
+
+ma vs dup_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  -0.29  -0.27  0.72       0.1651      0.9792        0.97  inconclusive
+  FD002  20  -0.70  -0.79  0.68       0.0010      0.0520        1.19  inconclusive
+  FD003  20  -0.10  +0.02  0.97       0.8408      0.9792        0.70  equivalent
+  FD004  20  -0.61  -0.80  0.53       0.0000      0.0384        1.01  different
+
+causal vs dup_plain
+          n   dMAE  dRMSE    sd  seedWilx(H)  2-level(H)  min margin  verdict
+  FD001  20  +0.20  +0.30  1.04       0.9048      1.0000        0.74  equivalent
+  FD002  20  -0.24  -0.41  0.70       0.0687      0.7516        0.58  equivalent
+  FD003  20  -0.40  -0.25  0.91       0.6485      0.6878        0.90  equivalent
+  FD004  20  -0.13  -0.07  0.56       0.9048      1.0000        0.49  equivalent
+
+=== seed budget: random k-seed subsets vs the all-seed two-level conclusion (variance-components test, Holm) ===
+noncausal vs plain: 20 seeds, all-seed Holm-significant datasets = []
+   k= 2: P(any Holm-significant)=0.14  P(same set as all-seed)=0.86
+   k= 3: P(any Holm-significant)=0.15  P(same set as all-seed)=0.85
+   k= 4: P(any Holm-significant)=0.15  P(same set as all-seed)=0.85
+   k= 6: P(any Holm-significant)=0.17  P(same set as all-seed)=0.83
+   k= 8: P(any Holm-significant)=0.19  P(same set as all-seed)=0.81
+   k=10: P(any Holm-significant)=0.22  P(same set as all-seed)=0.78
+   k=15: P(any Holm-significant)=0.23  P(same set as all-seed)=0.77
+causal vs plain: 20 seeds, all-seed Holm-significant datasets = []
+   k= 2: P(any Holm-significant)=0.08  P(same set as all-seed)=0.92
+   k= 3: P(any Holm-significant)=0.06  P(same set as all-seed)=0.94
+   k= 4: P(any Holm-significant)=0.05  P(same set as all-seed)=0.95
+   k= 6: P(any Holm-significant)=0.04  P(same set as all-seed)=0.96
+   k= 8: P(any Holm-significant)=0.03  P(same set as all-seed)=0.97
+   k=10: P(any Holm-significant)=0.03  P(same set as all-seed)=0.97
+   k=15: P(any Holm-significant)=0.00  P(same set as all-seed)=1.00
+ma vs causal: 20 seeds, all-seed Holm-significant datasets = []
+   k= 2: P(any Holm-significant)=0.19  P(same set as all-seed)=0.81
+   k= 3: P(any Holm-significant)=0.21  P(same set as all-seed)=0.79
+   k= 4: P(any Holm-significant)=0.16  P(same set as all-seed)=0.84
+   k= 6: P(any Holm-significant)=0.12  P(same set as all-seed)=0.88
+   k= 8: P(any Holm-significant)=0.09  P(same set as all-seed)=0.91
+   k=10: P(any Holm-significant)=0.12  P(same set as all-seed)=0.88
+   k=15: P(any Holm-significant)=0.11  P(same set as all-seed)=0.89
+order_sel vs plain: 20 seeds, all-seed Holm-significant datasets = []
+   k= 2: P(any Holm-significant)=0.04  P(same set as all-seed)=0.96
+   k= 3: P(any Holm-significant)=0.04  P(same set as all-seed)=0.96
+   k= 4: P(any Holm-significant)=0.09  P(same set as all-seed)=0.91
+   k= 6: P(any Holm-significant)=0.07  P(same set as all-seed)=0.93
+   k= 8: P(any Holm-significant)=0.05  P(same set as all-seed)=0.95
+   k=10: P(any Holm-significant)=0.07  P(same set as all-seed)=0.93
+   k=15: P(any Holm-significant)=0.01  P(same set as all-seed)=0.99
+
+=== sign stability: does a k-seed study get the SIGN of the mean RMSE difference right? (reference = all available seeds) ===
+noncausal vs plain
+  FD001: 20-seed dRMSE +0.37 | original six seeds +0.49 | P(sign right) k=3 0.69, k=6 0.82, k=10 0.93
+  FD002: 20-seed dRMSE -0.36 | original six seeds +0.34  <-- SIGN FLIPS | P(sign right) k=3 0.78, k=6 0.87, k=10 0.97
+  FD003: 20-seed dRMSE +0.64 | original six seeds +0.15 | P(sign right) k=3 0.81, k=6 0.91, k=10 0.98
+  FD004: 20-seed dRMSE +0.48 | original six seeds +0.79 | P(sign right) k=3 0.93, k=6 1.00, k=10 1.00
+causal vs plain
+  FD001: 20-seed dRMSE +0.55 | original six seeds +0.96 | P(sign right) k=3 0.87, k=6 0.96, k=10 1.00
+  FD002: 20-seed dRMSE -0.31 | original six seeds +0.05  <-- SIGN FLIPS | P(sign right) k=3 0.74, k=6 0.86, k=10 0.96
+  FD003: 20-seed dRMSE +0.21 | original six seeds -0.50  <-- SIGN FLIPS | P(sign right) k=3 0.64, k=6 0.66, k=10 0.73
+  FD004: 20-seed dRMSE +0.44 | original six seeds +0.67 | P(sign right) k=3 0.95, k=6 1.00, k=10 1.00
+order_sel vs plain
+  FD001: 20-seed dRMSE +0.74 | original six seeds -0.05  <-- SIGN FLIPS | P(sign right) k=3 0.88, k=6 0.97, k=10 1.00
+  FD002: 20-seed dRMSE -1.00 | original six seeds -0.82 | P(sign right) k=3 0.98, k=6 1.00, k=10 1.00
+  FD003: 20-seed dRMSE +0.25 | original six seeds -0.27  <-- SIGN FLIPS | P(sign right) k=3 0.62, k=6 0.69, k=10 0.79
+  FD004: 20-seed dRMSE -0.30 | original six seeds -0.02 | P(sign right) k=3 0.77, k=6 0.87, k=10 0.97
+ma vs plain
+  FD001: 20-seed dRMSE -0.01 | original six seeds +0.50  <-- SIGN FLIPS | P(sign right) k=3 0.50, k=6 0.51, k=10 0.54
+  FD002: 20-seed dRMSE -0.69 | original six seeds -0.49 | P(sign right) k=3 0.96, k=6 1.00, k=10 1.00
+  FD003: 20-seed dRMSE +0.48 | original six seeds +0.15 | P(sign right) k=3 0.74, k=6 0.83, k=10 0.94
+  FD004: 20-seed dRMSE -0.29 | original six seeds -0.11 | P(sign right) k=3 0.79, k=6 0.88, k=10 0.98
+ma vs causal
+  FD001: 20-seed dRMSE -0.56 | original six seeds -0.46 | P(sign right) k=3 0.84, k=6 0.96, k=10 1.00
+  FD002: 20-seed dRMSE -0.38 | original six seeds -0.54 | P(sign right) k=3 0.85, k=6 0.96, k=10 1.00
+  FD003: 20-seed dRMSE +0.27 | original six seeds +0.65 | P(sign right) k=3 0.73, k=6 0.81, k=10 0.93
+  FD004: 20-seed dRMSE -0.73 | original six seeds -0.78 | P(sign right) k=3 0.99, k=6 1.00, k=10 1.00
+
+=== seeds needed for 80% power (paired t on per-seed RMSE differences; alpha 0.05 and Holm 0.0125) ===
+  noncausal vs plain FD001: mean +0.37, sd 1.10 -> 71 seeds (Holm 101); half-cycle gap 40
+  noncausal vs plain FD002: mean -0.36, sd 0.87 -> 48 seeds (Holm 69); half-cycle gap 26
+  noncausal vs plain FD003: mean +0.64, sd 1.38 -> 39 seeds (Holm 55); half-cycle gap 62
+  noncausal vs plain FD004: mean +0.48, sd 0.63 -> 16 seeds (Holm 23); half-cycle gap 15
+  causal vs plain FD001: mean +0.55, sd 0.93 -> 24 seeds (Holm 34); half-cycle gap 29
+  causal vs plain FD002: mean -0.31, sd 0.83 -> 58 seeds (Holm 83); half-cycle gap 23
+  causal vs plain FD003: mean +0.21, sd 1.44 -> 377 seeds (Holm 536); half-cycle gap 67
+  causal vs plain FD004: mean +0.44, sd 0.49 -> 12 seeds (Holm 17); half-cycle gap 10
+  ma vs causal FD001: mean -0.56, sd 0.98 -> 26 seeds (Holm 37); half-cycle gap 32
+  ma vs causal FD002: mean -0.38, sd 0.64 -> 24 seeds (Holm 35); half-cycle gap 15
+  ma vs causal FD003: mean +0.27, sd 0.82 -> 74 seeds (Holm 106); half-cycle gap 23
+  ma vs causal FD004: mean -0.73, sd 0.67 -> 9 seeds (Holm 13); half-cycle gap 16
+  order_sel vs plain FD001: mean +0.74, sd 1.23 -> 23 seeds (Holm 34); half-cycle gap 49
+  order_sel vs plain FD002: mean -1.00, sd 0.80 -> 7 seeds (Holm 10); half-cycle gap 22
+  order_sel vs plain FD003: mean +0.25, sd 1.42 -> 252 seeds (Holm 358); half-cycle gap 65
+  order_sel vs plain FD004: mean -0.30, sd 0.74 -> 51 seeds (Holm 73); half-cycle gap 19
+
+saved results/extended_analysis.json

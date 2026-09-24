@@ -1,0 +1,271 @@
+{
+ "cells": {
+  "noncausal_vs_plain_FD001": {
+   "seed_share": 0.1085793925994573,
+   "se_seed_only": 0.08310985541504187,
+   "se_engine_part": 0.2381333149747584
+  },
+  "order_sel_vs_plain_FD001": {
+   "seed_share": 0.03547352543989734,
+   "se_seed_only": 0.10781275299484559,
+   "se_engine_part": 0.562179540705946
+  },
+  "causal_vs_plain_FD001": {
+   "seed_share": 0.22714453314002883,
+   "se_seed_only": 0.12313418479324925,
+   "se_engine_part": 0.22713111702112515
+  },
+  "ma_vs_plain_FD001": {
+   "seed_share": 0.04780385668360016,
+   "se_seed_only": 0.09095498900892014,
+   "se_engine_part": 0.40593665331302886
+  },
+  "ema_vs_plain_FD001": {
+   "seed_share": 0.09216132643283304,
+   "se_seed_only": 0.08568551740314483,
+   "se_engine_part": 0.26892885633023483
+  },
+  "pm_plain_vs_plain_FD001": {
+   "seed_share": 0.42249229023923407,
+   "se_seed_only": 0.09623008175876281,
+   "se_engine_part": 0.11250720971189838
+  },
+  "dup_plain_vs_plain_FD001": {
+   "seed_share": 0.5280885813830407,
+   "se_seed_only": 0.1761698701296115,
+   "se_engine_part": 0.1665361378183008
+  },
+  "order_sel_vs_noncausal_FD001": {
+   "seed_share": 0.09122459414043077,
+   "se_seed_only": 0.16226401094690224,
+   "se_engine_part": 0.5121468662005222
+  },
+  "causal_vs_noncausal_FD001": {
+   "seed_share": 0.4341648053090303,
+   "se_seed_only": 0.12337420694976582,
+   "se_engine_part": 0.14084519804632453
+  },
+  "ma_vs_causal_FD001": {
+   "seed_share": 0.04729382486038252,
+   "se_seed_only": 0.0765568427381778,
+   "se_engine_part": 0.34360643231076987
+  },
+  "ma_vs_order_sel_FD001": {
+   "seed_share": 0.09373191751122993,
+   "se_seed_only": 0.12236910269910171,
+   "se_engine_part": 0.38050149473218825
+  },
+  "noncausal_vs_dup_plain_FD001": {
+   "seed_share": 0.45630406669080464,
+   "se_seed_only": 0.18078992259456425,
+   "se_engine_part": 0.19734452924968704
+  },
+  "ma_vs_dup_plain_FD001": {
+   "seed_share": 0.05331735599666115,
+   "se_seed_only": 0.0819430809881959,
+   "se_engine_part": 0.3452869735100636
+  },
+  "noncausal_vs_plain_FD002": {
+   "seed_share": 0.310086397002891,
+   "se_seed_only": 0.10890114271271724,
+   "se_engine_part": 0.16243829915131447
+  },
+  "order_sel_vs_plain_FD002": {
+   "seed_share": 0.03359090989508575,
+   "se_seed_only": 0.07702283195660176,
+   "se_engine_part": 0.41313225333666903
+  },
+  "causal_vs_plain_FD002": {
+   "seed_share": 0.390556112643104,
+   "se_seed_only": 0.13163293285577343,
+   "se_engine_part": 0.1644332727667401
+  },
+  "ma_vs_plain_FD002": {
+   "seed_share": 0.10587967023700358,
+   "se_seed_only": 0.09239797129656287,
+   "se_engine_part": 0.2685060839964001
+  },
+  "ema_vs_plain_FD002": {
+   "seed_share": 0.07412574103667655,
+   "se_seed_only": 0.05581121780635683,
+   "se_engine_part": 0.1972481687793869
+  },
+  "pm_plain_vs_plain_FD002": {
+   "seed_share": 0.4912839135895768,
+   "se_seed_only": 0.08390571298210302,
+   "se_engine_part": 0.08538134572655101
+  },
+  "dup_plain_vs_plain_FD002": {
+   "seed_share": 0.48007351295196854,
+   "se_seed_only": 0.11217151229319176,
+   "se_engine_part": 0.11673461994220806
+  },
+  "order_sel_vs_noncausal_FD002": {
+   "seed_share": 0.06477970738789968,
+   "se_seed_only": 0.09961515460319786,
+   "se_engine_part": 0.37849738485185824
+  },
+  "causal_vs_noncausal_FD002": {
+   "seed_share": 0.5438998638582215,
+   "se_seed_only": 0.0987855180694296,
+   "se_engine_part": 0.09046152559896911
+  },
+  "ma_vs_causal_FD002": {
+   "seed_share": 0.07510469874930496,
+   "se_seed_only": 0.07361567797398913,
+   "se_engine_part": 0.2583348803050415
+  },
+  "ma_vs_order_sel_FD002": {
+   "seed_share": 0.12002397682044916,
+   "se_seed_only": 0.11262482327212911,
+   "se_engine_part": 0.30495484372424
+  },
+  "noncausal_vs_dup_plain_FD002": {
+   "seed_share": 0.20989661462905854,
+   "se_seed_only": 0.07841145461593653,
+   "se_engine_part": 0.15213136250237616
+  },
+  "ma_vs_dup_plain_FD002": {
+   "seed_share": 0.07594896466981331,
+   "se_seed_only": 0.07400391004878915,
+   "se_engine_part": 0.25813192289214015
+  },
+  "noncausal_vs_plain_FD003": {
+   "seed_share": 0.2314193360790919,
+   "se_seed_only": 0.10901820023180361,
+   "se_engine_part": 0.19867531647704137
+  },
+  "order_sel_vs_plain_FD003": {
+   "seed_share": 0.13999040944113086,
+   "se_seed_only": 0.14964937195830533,
+   "se_engine_part": 0.3709175682506747
+  },
+  "causal_vs_plain_FD003": {
+   "seed_share": 0.18160233871513806,
+   "se_seed_only": 0.09886502256121424,
+   "se_engine_part": 0.209876658485896
+  },
+  "ma_vs_plain_FD003": {
+   "seed_share": 0.1409204828636371,
+   "se_seed_only": 0.112915005811516,
+   "se_engine_part": 0.27879262567737595
+  },
+  "ema_vs_plain_FD003": {
+   "seed_share": 0.11020619453098135,
+   "se_seed_only": 0.07808015268940312,
+   "se_engine_part": 0.22186170172470332
+  },
+  "pm_plain_vs_plain_FD003": {
+   "seed_share": 0.5394933834932029,
+   "se_seed_only": 0.16608215489125816,
+   "se_engine_part": 0.15344327066705848
+  },
+  "dup_plain_vs_plain_FD003": {
+   "seed_share": 0.29657984425798317,
+   "se_seed_only": 0.12467924553242297,
+   "se_engine_part": 0.19201305319780135
+  },
+  "order_sel_vs_noncausal_FD003": {
+   "seed_share": 0.0,
+   "se_seed_only": 0.0,
+   "se_engine_part": 0.32493123474949626
+  },
+  "causal_vs_noncausal_FD003": {
+   "seed_share": 0.0,
+   "se_seed_only": 0.0,
+   "se_engine_part": 0.16807330232102077
+  },
+  "ma_vs_causal_FD003": {
+   "seed_share": 0.0,
+   "se_seed_only": 0.0,
+   "se_engine_part": 0.23189489084927226
+  },
+  "ma_vs_order_sel_FD003": {
+   "seed_share": 0.0,
+   "se_seed_only": 0.0,
+   "se_engine_part": 0.35297437664890147
+  },
+  "noncausal_vs_dup_plain_FD003": {
+   "seed_share": 0.16867955893508838,
+   "se_seed_only": 0.08092489225032762,
+   "se_engine_part": 0.1796532719045686
+  },
+  "ma_vs_dup_plain_FD003": {
+   "seed_share": 0.0,
+   "se_seed_only": 0.0,
+   "se_engine_part": 0.29445556989338306
+  },
+  "noncausal_vs_plain_FD004": {
+   "seed_share": 0.056077348861472094,
+   "se_seed_only": 0.039141628122398166,
+   "se_engine_part": 0.16058809773585328
+  },
+  "order_sel_vs_plain_FD004": {
+   "seed_share": 0.10212530491974038,
+   "se_seed_only": 0.09931095963310109,
+   "se_engine_part": 0.29446817266543523
+  },
+  "causal_vs_plain_FD004": {
+   "seed_share": 0.1466142825365685,
+   "se_seed_only": 0.06213964773931352,
+   "se_engine_part": 0.1499178455093204
+  },
+  "ma_vs_plain_FD004": {
+   "seed_share": 0.2969589224344289,
+   "se_seed_only": 0.11562138068167581,
+   "se_engine_part": 0.17790178771710785
+  },
+  "ema_vs_plain_FD004": {
+   "seed_share": 0.3003335933816408,
+   "se_seed_only": 0.09569048264204805,
+   "se_engine_part": 0.1460536114360773
+  },
+  "pm_plain_vs_plain_FD004": {
+   "seed_share": 0.18082468495480988,
+   "se_seed_only": 0.038305426924181624,
+   "se_engine_part": 0.0815304570424093
+  },
+  "dup_plain_vs_plain_FD004": {
+   "seed_share": 0.2245752795452969,
+   "se_seed_only": 0.058968273079114834,
+   "se_engine_part": 0.10957393443383276
+  },
+  "order_sel_vs_noncausal_FD004": {
+   "seed_share": 0.12817670598091904,
+   "se_seed_only": 0.08912505949027366,
+   "se_engine_part": 0.2324392759017032
+  },
+  "causal_vs_noncausal_FD004": {
+   "seed_share": 0.19825767105482786,
+   "se_seed_only": 0.04777034454477716,
+   "se_engine_part": 0.09606402521246556
+  },
+  "ma_vs_causal_FD004": {
+   "seed_share": 0.2199783726231171,
+   "se_seed_only": 0.1011347293808937,
+   "se_engine_part": 0.1904424002402721
+  },
+  "ma_vs_order_sel_FD004": {
+   "seed_share": 0.059909388716547954,
+   "se_seed_only": 0.06308823834267213,
+   "se_engine_part": 0.2499112541717621
+  },
+  "noncausal_vs_dup_plain_FD004": {
+   "seed_share": 0.21193086398545125,
+   "se_seed_only": 0.08980131146129577,
+   "se_engine_part": 0.17316803720069687
+  },
+  "ma_vs_dup_plain_FD004": {
+   "seed_share": 0.12415807718778628,
+   "se_seed_only": 0.0720173920456382,
+   "se_engine_part": 0.19127700622987845
+  }
+ },
+ "quantiles": {
+  "p10": 0.03377917144956691,
+  "p25": 0.07178923262448234,
+  "p50": 0.13408355771102495,
+  "p75": 0.24770946312381473,
+  "p90": 0.4540901405526272
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "fingerprint": "bd1230b6de7424380a28585bd71085737bad5d9e7c4a498fc91f987a92717e2c",
+ "counters": {
+  "series": 3000,
+  "fits": 12000,
+  "nonconverged": 322,
+  "fallback": 0,
+  "order_choice_counts": {
+   "(0, 1, 1)": 2461,
+   "(1, 1, 1)": 495,
+   "(2, 1, 0)": 31,
+   "(1, 1, 0)": 13
+  }
+ }
+}

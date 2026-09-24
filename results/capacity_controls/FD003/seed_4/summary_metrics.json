@@ -1,0 +1,26 @@
+{
+  "ParamMatched_Plain_LSTM": {
+    "RMSE": 15.517473769512227,
+    "MAE": 10.462594985961914,
+    "PHM_score": 907.9576416015625,
+    "n_test": 100,
+    "n_params": 59729,
+    "hidden": 66
+  },
+  "DupChannel_Plain_LSTM": {
+    "RMSE": 14.930986971672107,
+    "MAE": 10.402012825012207,
+    "PHM_score": 463.4938049316406,
+    "n_test": 100,
+    "n_params": 60481,
+    "hidden": 64
+  },
+  "_meta": {
+    "dataset": "FD003",
+    "seed": 4,
+    "runtime_sec": 289.9229109287262,
+    "matched_hidden": 66,
+    "hybrid_params": 60481,
+    "n_train_windows": 18575
+  }
+}

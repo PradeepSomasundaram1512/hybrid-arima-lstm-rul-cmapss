@@ -1,0 +1,317 @@
+\documentclass[conference]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{url}
+\graphicspath{{figures/}{./}}
+
+\newif\ifblind\blindfalse
+\begin{document}
+
+\title{Reliable Evaluation of ARIMA-LSTM Hybrids for Remaining Useful Life Prediction: \\ A Multi-Seed, Specification-Sensitive Study on NASA C-MAPSS}
+
+\author{
+\IEEEauthorblockN{Pradeep Somasundaram}
+\IEEEauthorblockA{Independent Researcher \\
+Dallas, TX, USA \\
+aadhi1501@gmail.com}
+}
+
+\maketitle
+
+\begin{abstract}
+Adding a classical ARIMA trend feature to an LSTM is a common design for remaining useful life (RUL) prediction. We evaluate it carefully on NASA C-MAPSS rather than proposing a new model. Across all four sub-datasets and 20 seeds, we compare a plain LSTM with hybrids using three ARIMA specifications (fixed order, AIC-selected order, and a causal expanding-window construction), two cheap smoothing features, and two capacity controls. Effects depend on the dataset. On FD002 trend features lower RMSE, most with AIC-selected ARIMA ($-1.00$ cycles, seed-level Holm $p=0.0004$) and a free moving average ($-0.69$); on FD001 and FD003 they do not help. The FD004 penalty of ARIMA hybrids is reproduced by duplicating inputs with no new information, so it reflects input width, not the trend. Causal and non-causal construction perform equivalently, and a moving average matches or beats causal ARIMA at about $1/2000$ of the feature cost. Evaluation itself is fragile: our first six seeds reversed the sign of the effect in 6 of 20 comparisons, and most seed-level effects fail a stricter test that also resamples test engines.
+\end{abstract}
+
+\begin{IEEEkeywords}
+remaining useful life, predictive maintenance, LSTM, time-series forecasting, feature engineering, industrial IoT, NASA C-MAPSS, reproducibility
+\end{IEEEkeywords}
+
+\section{Introduction}
+Estimating remaining useful life (RUL) from streaming sensor data is central to prognostics and health management (PHM) \cite{saxena2008}, and a recent survey \cite{survey2025} catalogs the deep-learning approaches now used for it. NASA's C-MAPSS turbofan simulation \cite{saxena2008} is the standard benchmark: a controlled, multi-regime, multi-fault-mode setting where model-comparison claims can in principle be checked. A common design fits an ARIMA model per sensor channel and concatenates its trend with the raw signal before an LSTM regressor \cite{zhang2003}, letting the network spend capacity on residual nonlinear dynamics.
+
+But deep models are trained stochastically, and an ARIMA feature is itself a specification choice: order, fitting window, and causality with respect to the prediction target. Prior turbofan RUL papers, including hybrid-forecasting work we cite favorably \cite{arimalstmvalve2022}, typically report neither seed count nor causal validity. We therefore evaluate, rather than propose, ARIMA trend augmentation: all four C-MAPSS sub-datasets, 20 seeds, three ARIMA specifications, cheap alternatives, and controls that separate the information a trend feature carries from the extra input width it brings.
+
+\emph{Research questions.} RQ1: does an ARIMA trend feature help an LSTM, and does causal construction matter? RQ2: how reliable are conclusions drawn from few seeds? RQ3: how much does ARIMA order specification matter? RQ4: is any effect due to trend information or to input width and capacity? RQ5: can a cheap, fitting-free smoother replace ARIMA?
+
+\emph{Contributions:} (1) a 20-seed, four-dataset evaluation with matched protocol; (2) a causal ARIMA construction, verified to remove a train/test asymmetry, and shown to be accuracy-equivalent to the standard construction; (3) capacity controls (parameter-matched and duplicated-input LSTMs) that attribute the FD004 penalty to input width; (4) evidence that a moving average matches or beats causal ARIMA at a tiny fraction of the cost; (5) a quantification of how few-seed studies mislead, with seed-level and two-level (seeds and engines) tests under Holm-Bonferroni correction. Code, per-seed predictions, and pinned package versions are public at \ifblind [repository URL withheld for blind review]\else\url{https://github.com/PradeepSomasundaram1512/hybrid-arima-lstm-rul-cmapss}\fi.
+
+\section{Related Work}
+\emph{RUL on C-MAPSS.} The benchmark \cite{saxena2008} underlies most data-driven RUL work; Ramasso and Saxena \cite{cmapssbenchmark2014} laid out early benchmarking protocols, early deep models used CNNs \cite{babu2016} and LSTMs \cite{zheng2017}, and recent architectures include CNN-LSTM \cite{cnnlstm2024}, residual-corrected BiLSTM \cite{biclstm2026}, and attention-based BiLSTM \cite{sharma2025} hybrids. Su and Fang \cite{multiheadattn2026} decompose degradation into trend, operational-state, and residual components with a learned embedding, which motivates our trend/residual split. We do not compare against reported numbers, since protocols may differ.
+
+\emph{Hybrid statistical/neural forecasting.} ARIMA-neural hybrids have a long history \cite{zhang2003} and have been applied to RUL-adjacent problems \cite{arimalstmvalve2022}, typically without reporting seed count or causal validity of the ARIMA construction.
+
+\emph{Reproducibility and seed sensitivity.} Single-seed deep reinforcement learning results routinely fail to replicate \cite{henderson2018}, and exact reproducibility does not imply robustness to small setup changes \cite{bouthillier2019}; a companion paper \cite{bouthillier2021} proposes concrete variance-estimation protocols. Colas et al.\ \cite{colas2018} show how the number of seeds governs the error rates of significance tests, and Agarwal et al.\ \cite{agarwal2021} argue that few-run evaluations must report interval estimates rather than point estimates; our seed-budget analysis applies both ideas to RUL prediction. Individual seeds can differ by margins comparable to the gap between published methods \cite{picard2021}, a variance traced to a calibration property of the trained network \cite{jordan2024}. Dem\v{s}ar \cite{demsar2006} sets out the paired, multiple-comparison-corrected testing we follow, with Holm's step-down procedure \cite{holm1979}, and Lakens \cite{lakens2017} describes the equivalence testing we use to make claims of no practical difference. A contemporaneous benchmark on this dataset \cite{goel2026} uses one fixed seed, and a parallel audit \cite{gupta2026} finds preprocessing choices materially affect reported C-MAPSS metrics. We treat ARIMA specification, causal construction, and seed count as experimental variables.
+
+\section{Methodology}
+\emph{Data and preprocessing.} All four C-MAPSS sub-datasets \cite{saxena2008}: FD001/FD003 (100 engines, 1 condition, 1/2 fault modes) and FD002/FD004 (260/249 engines, 6 conditions, 1/2 fault modes). RUL is capped at 125 cycles and near-constant sensors are dropped (15 of 21 retained for FD001/FD003). For FD002/FD004 we $K$-means cluster the operating settings into 6 regimes (fit on training data only) and $z$-score per regime \cite{regimenorm2018}, clipped to $\pm6$ standard deviations.
+
+\emph{ARIMA trend features.} For each (unit, sensor) the fitted trend $\hat{y}_t$ is concatenated with the raw features before a 2-layer LSTM (hidden size 64) \cite{lstm1997} and a $64{\to}32{\to}1$ head. \emph{Fixed order}: ARIMA$(1,1,0)$, parameters fit once by MLE on the unit's whole available series. \emph{AIC-selected}: the best of $(1,1,0)$, $(0,1,1)$, $(1,1,1)$, $(2,1,0)$ under the same full-series fit; like the fixed order it is non-causal, and it isolates order from causality. \emph{Causal}: ARIMA$(1,1,0)$ (statsmodels, no constant) is fit on the first 10 cycles; for each later cycle $t$, if 20 cycles have passed since the last refit it is refit by full MLE on cycles $1..t$, otherwise its Kalman state is extended with $y_t$ (append, no refit). The trend at $t$ is the one-step prediction of $y_t$ from the filtered state through $t-1$ and parameters estimated from cycles up to $t$; no later observation is used. The first 10 cycles use the burn-in fit, and series of 11 or fewer cycles or failed fits fall back to a trailing 5-cycle mean (none occurred in 27{,}536 series).
+
+\emph{Controls and baselines.} A \emph{moving average} (trailing 10 cycles) and \emph{exponential smoothing} ($\alpha=0.3$) replace ARIMA with trivially causal, fitting-free features. Two plain-LSTM controls separate information from capacity: a \emph{parameter-matched} LSTM (hidden size 66 or 67, matching the hybrid's parameter count) and a \emph{duplicated-input} LSTM (raw features concatenated with an exact copy, as wide as the hybrid but with no new information). A CNN-LSTM \cite{cnnlstm2024} tests whether findings are specific to the LSTM backbone. All models use Adam ($10^{-3}$), MSE loss on capped RUL, window length 30, and early stopping on 15\% held-out validation engines (patience 8, at most 60 epochs). Each test engine is scored once from its final window; we report RMSE, MAE, and the PHM score \cite{saxena2008}.
+
+\section{Experimental Setup}
+Every result uses 20 seeds: the original six (42, 123, 2024, 7, 99, 314) and 14 more fixed in advance (1 to 15 except 7). With PyTorch 2.14.0 on CPU, reruns reproduce archived results essentially exactly: the main pipeline matched to four decimals on FD001, and all 24 AIC-selected reruns matched to within $4\times10^{-15}$. ARIMA features depend only on the normalised series, not the seed, so they are computed once per dataset and reused; a SHA-256 fingerprint of the normalised data guards each reuse. About 6.5\% to 7.0\% of ARIMA fits (fixed, AIC, causal) did not fully converge; such fits are kept, and only exceptions trigger the fallback. Validation engines are drawn from a generator seeded with the run's seed, so the split changes across seeds but is identical across all models under one seed.
+
+\emph{Statistical protocol.} The seed-level test is a paired Wilcoxon test on the 20 per-seed test RMSEs of two models; it asks whether training procedures differ on this test set. The two-level test also treats the test engines as a sample: seeds and engines are crossed factors, and we use a variance-components $t$-test (Satterthwaite degrees of freedom) and a pigeonhole bootstrap \cite{owen2007} with 40{,}000 resamples on per-engine absolute errors, keeping the larger $p$. Both use Holm-Bonferroni correction across the four datasets within each comparison. Equivalence uses a margin of 1 cycle of per-engine absolute error (about 10\% of MAE) with the 90\% interval.
+
+\begin{table}[t]
+\centering
+\caption{Test RMSE (cycles), mean $\pm$ std over 20 seeds. Best 20-seed mean per dataset in bold; CNN-LSTM has six seeds only.}
+\label{tab:means}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lcccc}
+\toprule
+Model & FD001 & FD002 & FD003 & FD004 \\
+\midrule
+Plain LSTM & 14.26{\tiny$\pm$0.64} & 14.75{\tiny$\pm$0.62} & 14.36{\tiny$\pm$1.30} & 15.05{\tiny$\pm$0.29} \\
+Fixed-order ARIMA & 14.63{\tiny$\pm$1.15} & 14.39{\tiny$\pm$0.53} & 14.99{\tiny$\pm$0.72} & 15.52{\tiny$\pm$0.48} \\
+AIC-selected ARIMA & 15.00{\tiny$\pm$1.00} & \textbf{13.75{\tiny$\pm$0.79}} & 14.61{\tiny$\pm$0.86} & \textbf{14.75{\tiny$\pm$0.56}} \\
+Causal ARIMA & 14.81{\tiny$\pm$0.88} & 14.44{\tiny$\pm$0.46} & 14.56{\tiny$\pm$0.67} & 15.48{\tiny$\pm$0.45} \\
+Moving average & \textbf{14.25{\tiny$\pm$0.72}} & 14.06{\tiny$\pm$0.43} & 14.84{\tiny$\pm$0.71} & 14.75{\tiny$\pm$0.58} \\
+Exp.\ smoothing & 14.56{\tiny$\pm$0.98} & 14.23{\tiny$\pm$0.61} & 14.76{\tiny$\pm$0.96} & 15.12{\tiny$\pm$0.47} \\
+Param-matched plain & 14.54{\tiny$\pm$0.70} & 14.62{\tiny$\pm$0.47} & \textbf{14.31{\tiny$\pm$0.74}} & 15.08{\tiny$\pm$0.50} \\
+Dup.-input plain & 14.52{\tiny$\pm$0.82} & 14.85{\tiny$\pm$0.55} & 14.81{\tiny$\pm$1.01} & 15.55{\tiny$\pm$0.49} \\
+CNN-LSTM (6 seeds) & 14.47{\tiny$\pm$0.59} & 15.11{\tiny$\pm$1.05} & 13.90{\tiny$\pm$0.70} & 14.86{\tiny$\pm$0.54} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{Mean per-seed RMSE difference (first minus second, cycles; negative favours the first). $^*$: seed-level Holm $p<0.05$; $^\dagger$: two-level Holm $p<0.05$.}
+\label{tab:paired}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lcccc}
+\toprule
+Comparison & FD001 & FD002 & FD003 & FD004 \\
+\midrule
+Fixed ARIMA $-$ plain & +0.37 & $-$0.36 & +0.64 & +0.48$^*$ \\
+AIC ARIMA $-$ plain & +0.74$^*$ & $-$1.00$^*$ & +0.25 & $-$0.30 \\
+Causal ARIMA $-$ plain & +0.55 & $-$0.31 & +0.21 & +0.44$^*$ \\
+Moving avg $-$ plain & $-$0.01 & $-$0.69$^*$ & +0.48 & $-$0.29 \\
+Exp.\ smooth $-$ plain & +0.30 & $-$0.52$^*$ & +0.41 & +0.08 \\
+Param-matched $-$ plain & +0.28 & $-$0.13 & $-$0.05 & +0.03 \\
+Dup.\ input $-$ plain & +0.26 & +0.10 & +0.46 & +0.50$^*$ \\
+AIC $-$ fixed ARIMA & +0.37 & $-$0.64$^*$ & $-$0.39 & $-$0.78$^*$$^\dagger$ \\
+Causal $-$ fixed ARIMA & +0.18 & +0.05 & $-$0.43 & $-$0.04 \\
+Moving avg $-$ causal & $-$0.56$^*$ & $-$0.38$^*$ & +0.27 & $-$0.73$^*$ \\
+Fixed ARIMA $-$ dup.\ input & +0.11 & $-$0.46$^*$ & +0.18 & $-$0.02 \\
+Moving avg $-$ dup.\ input & $-$0.27 & $-$0.79$^*$ & +0.02 & $-$0.80$^*$$^\dagger$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table}[t]
+\centering
+\caption{Largest difference from zero compatible with the data: half-width of the two-level 90\% interval, in cycles of per-engine absolute error. Bold: within the 1-cycle equivalence margin.}
+\label{tab:equiv}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lcccc}
+\toprule
+Comparison & FD001 & FD002 & FD003 & FD004 \\
+\midrule
+Fixed ARIMA $-$ plain & \textbf{0.84} & \textbf{0.57} & 1.07 & \textbf{0.59} \\
+AIC ARIMA $-$ plain & 1.36 & 1.43 & \textbf{0.94} & 1.16 \\
+Causal ARIMA $-$ plain & \textbf{0.95} & \textbf{0.43} & \textbf{0.57} & \textbf{0.57} \\
+Moving avg $-$ plain & \textbf{0.84} & \textbf{0.93} & \textbf{0.97} & \textbf{0.66} \\
+Exp.\ smooth $-$ plain & \textbf{0.78} & \textbf{0.73} & \textbf{0.85} & \textbf{0.38} \\
+Param-matched $-$ plain & \textbf{0.58} & \textbf{0.39} & \textbf{0.60} & \textbf{0.26} \\
+Dup.\ input $-$ plain & \textbf{0.71} & \textbf{0.61} & \textbf{0.98} & \textbf{0.64} \\
+Causal $-$ fixed ARIMA & \textbf{0.57} & \textbf{0.51} & \textbf{0.91} & \textbf{0.27} \\
+Moving avg $-$ causal & 1.16 & \textbf{0.94} & \textbf{0.81} & \textbf{0.89} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering
+\caption{How often a study with $k$ random seeds reaches the 20-seed conclusion.}
+\label{tab:budget}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lccc}
+\toprule
+ & $k{=}3$ & $k{=}6$ & $k{=}10$ \\
+\midrule
+Sign recovered, median over 20 cells & 0.80 & 0.89 & 0.98 \\
+Sign recovered, worst cell & 0.50 & 0.51 & 0.54 \\
+Any two-level significant cell (mean) & 0.12 & 0.10 & 0.11 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\begin{table*}[t]
+\centering
+\caption{Secondary metrics over 20 seeds: MAE (cycles, mean $\pm$ std) and mean PHM score (lower is better).}
+\label{tab:metrics}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{4}{c}{MAE} & \multicolumn{4}{c}{PHM score} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Model & FD001 & FD002 & FD003 & FD004 & FD001 & FD002 & FD003 & FD004 \\
+\midrule
+Plain LSTM & 10.48{\tiny$\pm$0.52} & 10.35{\tiny$\pm$0.37} & 9.91{\tiny$\pm$0.90} & 10.69{\tiny$\pm$0.32} & 431 & 1282 & 581 & 1178 \\
+Fixed ARIMA & 10.78{\tiny$\pm$0.78} & 10.17{\tiny$\pm$0.38} & 10.44{\tiny$\pm$0.47} & 10.92{\tiny$\pm$0.35} & 454 & 1267 & 722 & 1351 \\
+AIC ARIMA & 10.82{\tiny$\pm$0.76} & 9.64{\tiny$\pm$0.47} & 9.70{\tiny$\pm$0.60} & 10.07{\tiny$\pm$0.41} & 423 & 1029 & 876 & 1265 \\
+Causal ARIMA & 10.89{\tiny$\pm$0.70} & 10.39{\tiny$\pm$0.49} & 9.95{\tiny$\pm$0.42} & 10.92{\tiny$\pm$0.39} & 495 & 1212 & 717 & 1213 \\
+Moving avg & 10.40{\tiny$\pm$0.64} & 9.93{\tiny$\pm$0.29} & 10.25{\tiny$\pm$0.44} & 10.43{\tiny$\pm$0.45} & 415 & 1089 & 708 & 1094 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+
+\begin{table*}[t]
+\centering
+\caption{Holm-adjusted $p$-values for every comparison in Table~\ref{tab:paired}: seed-level test / two-level test. Bold: $p<0.05$.}
+\label{tab:pvals}
+\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lcccc}
+\toprule
+Comparison & FD001 & FD002 & FD003 & FD004 \\
+\midrule
+Fixed ARIMA $-$ plain & 0.312 / 0.746 & 0.098 / 0.746 & 0.098 / 0.423 & \textbf{0.008} / 0.746 \\
+AIC ARIMA $-$ plain & \textbf{0.041} / 1.000 & \textbf{$<$0.001} / 0.313 & 0.498 / 1.000 & 0.097 / 0.289 \\
+Causal ARIMA $-$ plain & 0.064 / 0.788 & 0.330 / 1.000 & 0.452 / 1.000 & \textbf{0.003} / 0.788 \\
+Moving avg $-$ plain & 0.869 / 0.873 & \textbf{0.007} / 0.664 & 0.316 / 0.873 & 0.316 / 0.873 \\
+Exp.\ smooth $-$ plain & 0.624 / 1.000 & \textbf{0.017} / 0.549 & 0.269 / 0.958 & 0.624 / 1.000 \\
+Param-matched $-$ plain & 0.422 / 1.000 & 1.000 / 1.000 & 1.000 / 1.000 & 1.000 / 1.000 \\
+Dup.\ input $-$ plain & 0.783 / 0.494 & 0.783 / 0.489 & 0.783 / 0.489 & \textbf{0.006} / 0.152 \\
+AIC $-$ fixed ARIMA & 0.211 / 0.943 & \textbf{0.025} / 0.403 & 0.211 / 0.192 & \textbf{$<$0.001} / \textbf{0.005} \\
+Causal $-$ fixed ARIMA & 1.000 / 1.000 & 1.000 / 0.538 & 0.069 / 0.227 & 1.000 / 1.000 \\
+Moving avg $-$ causal & \textbf{0.038} / 0.451 & \textbf{0.028} / 0.349 & 0.070 / 0.451 & \textbf{$<$0.001} / 0.189 \\
+Fixed ARIMA $-$ dup.\ input & 1.000 / 1.000 & \textbf{0.038} / 0.099 & 1.000 / 1.000 & 1.000 / 1.000 \\
+Moving avg $-$ dup.\ input & 0.165 / 0.979 & \textbf{$<$0.001} / 0.052 & 0.841 / 0.979 & \textbf{$<$0.001} / \textbf{0.038} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\section{Results}
+
+\subsection{RQ1: Do Trend Features Help, and Does Causality Matter?}
+Table~\ref{tab:means} and Fig.~\ref{fig:paired} show no uniform winner. The plain LSTM is best or tied on FD001 and FD003; on FD002, every trend-augmented hybrid improves on it, by 0.3 to 1.0 cycles, and the AIC-selected hybrid is best (13.75 vs.\ 14.75 RMSE; seed-level Holm $p=0.0004$, Table~\ref{tab:paired}). On FD001 the AIC hybrid is worse ($+0.74$, $p=0.041$), and on FD004 the fixed-order and causal hybrids are worse ($+0.48$, $p=0.008$; $+0.44$, $p=0.003$).
+
+Causality costs no accuracy: the causal and fixed-order hybrids are equivalent on all four datasets (largest interval margin 0.91 cycles), so the deployable construction is as good as the standard one. Its cost is compute: about 222 ms of CPU per series against 5.1 ms for the full-series fit (FD002; 274 vs.\ 6.3 ms on FD001).
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_paired20.pdf}
+\caption{Per-seed test RMSE of each variant minus the plain LSTM (20 seeds; bars mark the mean). Trend features help on FD002, not on FD001 or FD003, and the duplicated-input control reproduces the FD004 penalty.}
+\label{fig:paired}
+\end{figure*}
+
+\subsection{RQ2: How Reliable Are Few-Seed Conclusions?}
+Our first six seeds reversed the sign of the mean RMSE difference in 6 of the 20 dataset-and-comparison cells we examined (five comparisons, four datasets). The fixed-order hybrid on FD002 looked worse than plain at six seeds ($+0.34$) and is better at 20 ($-0.36$); the AIC hybrid on FD001 flips from $-0.05$ to $+0.74$. For a random six-seed study, the chance of recovering the 20-seed sign ranges from 0.51 to 1.00 across these cells (median 0.89; at ten seeds 0.73 to 1.00, except for one near-zero effect). Fig.~\ref{fig:cumulative} shows the running estimate settling only after roughly ten seeds, and Table~\ref{tab:budget} summarises the seed budget.
+
+Engine-level tests on few seeds are also over-confident, because they treat the trained networks as fixed. A six-seed engine-level test (paired Wilcoxon on seed-averaged per-engine errors) flags the fixed-order penalty on FD004 (raw $p=0.004$); under the two-level test it is not significant at six or at 20 seeds. \emph{Where the uncertainty comes from.} Across 52 comparison cells, training-seed variation accounts for a median of 13\% of the variance of the mean per-engine error difference (interquartile range 7\% to 25\%); the median standard error is 0.09 cycles from seeds alone and 0.20 cycles from test-engine sampling. With 20 seeds, most of the remaining uncertainty is therefore about which engines are tested. More seeds sharpen seed-level tests, but claims about other engines are limited by the 100 to 259 test engines, which is why the seed-level and two-level tests disagree so often. Detecting the observed differences at 80\% power needs 7 to 380 seeds, or 10 to 67 to detect a half-cycle gap.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_cumulative.pdf}
+\caption{Running mean RMSE difference (hybrid minus plain) as seeds are added in the order used. The shaded region is a three-seed study, the dotted line the original six seeds.}
+\label{fig:cumulative}
+\end{figure*}
+
+\subsection{RQ3: Order Specification}
+The AIC-selected order beats the fixed order on FD004 ($-0.78$; seed-level $p=0.0008$) and FD002 ($-0.64$; $p=0.025$), and FD004 is the one cell in this family that also survives the two-level test (Holm $p=0.005$). Order selection overwhelmingly preferred $(0,1,1)$ (76\% to 82\% of series). Because AIC selection is non-causal, this is a specification-sensitivity result under the original protocol, not evidence that a causally-fit AIC model would behave the same way.
+
+\subsection{RQ4: Trend Information or Input Width?}
+A parameter-matched plain LSTM is indistinguishable from plain (margins $\le0.6$ cycles), so parameter count alone changes nothing. Duplicating the input, with no new information, hurts on FD004 by $+0.50$ RMSE ($p=0.006$), the same size as the fixed-order and causal hybrids' penalty; the fixed-order hybrid equals the duplicated-input model there ($-0.02$). The FD004 penalty is therefore an input-width effect, not evidence that the ARIMA trend is uninformative. Conversely on FD002 the duplicated-input model shows no gain ($+0.10$), while the moving average beats it by $0.79$ (seed-level $p=0.001$, two-level $p=0.052$), and on FD004 it beats it by $0.80$ (two-level $p=0.038$), so the FD002 gain comes from trend information, not width.
+
+\subsection{RQ5: Can a Cheap Smoother Replace ARIMA?}
+The moving average matches or beats causal ARIMA on three of four datasets ($-0.56$, $-0.38$, $-0.73$ on FD001, FD002, FD004; seed-level $p\le0.04$) and is not distinguishable from AIC-selected ARIMA on any dataset. Exponential smoothing behaves similarly. The moving average takes 0.10 ms per series, roughly $2{,}000\times$ less than causal ARIMA. Neither smoother helps on FD003.
+
+\emph{What survives the two-level test.} Table~\ref{tab:pvals} lists both $p$-values for every cell. Of 48 comparison cells in Table~\ref{tab:paired}, 15 are significant at the seed level but only 2 at the two-level: AIC vs.\ fixed order on FD004 (Holm $p=0.005$) and the moving average vs.\ the duplicated-input control on FD004 ($p=0.038$). The AIC hybrid also beats the duplicated-input control on FD004 ($p=0.030$). MAE follows RMSE (Table~\ref{tab:metrics}); the PHM score, which penalises late predictions, agrees on FD002 (AIC ARIMA lowest) but not on FD004, where the AIC hybrid's lower RMSE and MAE come with a higher PHM score than plain (1265 vs.\ 1178), a reminder that the metrics weight errors differently. Table~\ref{tab:equiv} shows how far each variant could plausibly sit from plain: the causal hybrid, both smoothers, and both controls are within one cycle of plain on every dataset, and the fixed-order hybrid on three of four (FD003 reaches 1.07); only the AIC hybrid, the variant with real effects, has intervals reaching 1.4 cycles.
+
+
+\subsection{Additional Checks (Six Seeds)}
+Three further checks were run on the original six seeds only, so, given RQ2, they are suggestive. A CNN-LSTM with no ARIMA feature has the best mean RMSE of all models on FD003 (13.90) and the worst on FD002 (15.11), but no difference from plain survives either test. A gated-fusion variant (a learned per-channel gate on the AIC-selected trend) shows no significant difference from plain or from the AIC hybrid. A window-length ablation on FD001 ($W\in\{10,20,30,50\}$) found a hybrid advantage at $W=20$ and $30$ (0.68 and 0.54 cycles), but it used a shorter training budget (patience 6, at most 50 epochs), and the full-budget 20-seed comparison at $W=30$ finds the hybrid slightly worse on FD001, so the ablation's advantage is budget-sensitive and should not be read as protocol-matched.
+
+\section{Discussion}
+The paper's value does not depend on ARIMA winning. Trend information helps on FD002, the six-regime single-fault dataset, and the cheapest trend feature captures much of that benefit; on the other datasets it does not help, and on FD004 the apparent ARIMA penalty is an input-width artifact that a control exposes. We have no mechanistic account of why FD002 differs: an earlier per-sensor linearity check (in the repository) did not distinguish FD002 from FD004 once sensors were aggregated to their engine. The AIC findings come from the non-causal protocol and are not conclusions about the deployable specification; only the causal and moving-average results are.
+
+The methodological lesson is the paper's contribution: with six seeds, six of 20 conclusions had the wrong sign, and engine-level significance overstated what survives when training variation is included. We would advise five or more seeds at minimum, ten or more for effects of a cycle or less, a cheap non-ARIMA baseline and a capacity control in every hybrid comparison, seed-level and two-level reporting, and a check that any deployed feature is causal.
+
+
+\emph{A checklist for hybrid-feature claims.} (1) Report at least five seeds, and ten or more when the effect is a cycle or less; (2) state the sign and size of the effect with its interval, not only a $p$-value; (3) include a capacity-matched control, such as a duplicated-input model, so that width is not mistaken for information; (4) include a cheap non-ARIMA baseline; (5) report seed-level and two-level tests with multiple-comparison correction; and (6) verify that any feature intended for deployment uses no observation after the predicted cycle.
+
+\section{Limitations}
+Twenty seeds is still moderate power for effects of a fraction of a cycle. All experiments use one simulated benchmark, one recurrent family, and a fixed test set, so generalization to real industrial streams is untested. The AIC results are non-causal, and no causal AIC selection was run. CNN-LSTM, a gated-fusion variant, and a window-length ablation were run at six seeds only (see the repository). The causal specification costs about 44 times the full-series ARIMA fit, and end-to-end runtimes were measured under concurrent load and are indicative only.
+
+\section{Conclusion}
+Evaluated over 20 seeds, four datasets, three ARIMA specifications, cheap alternatives, and capacity controls, ARIMA trend augmentation of an LSTM is dataset-specific: it helps on FD002 (most with AIC-selected order), does not help on FD001 or FD003, and its FD004 penalty is an input-width effect. Causal construction is accuracy-equivalent to the standard one, and a moving average matches or beats causal ARIMA at a tiny fraction of its cost. Six seeds reversed the sign of the effect in 6 of 20 comparisons, so few-seed and engine-level results should be treated as provisional, and comparisons should include cheap and capacity-matched baselines. Future work is a second benchmark and backbone, causal AIC selection, and real industrial data.
+
+\section*{Code and Data Availability}
+Code, per-seed predictions, and pinned package versions are at \ifblind [repository URL withheld for blind review]\else\url{https://github.com/PradeepSomasundaram1512/hybrid-arima-lstm-rul-cmapss}\fi: the archived results comprise 454 pipeline executions training 1{,}136 models (four datasets, 20 seeds each for the plain, fixed-order, AIC-selected, causal, moving-average, exponential-smoothing, and capacity-control runs; six seeds for CNN-LSTM and gated fusion; and six seeds of a window-length ablation).
+
+\section*{Acknowledgment}
+Portions of the experimental code and manuscript drafting were produced with the assistance of a generative AI system, under the author's direct supervision and review; the author verified all reported results, code, and claims. The author declares no conflicts of interest and received no external funding for this work.
+
+\small
+\begin{thebibliography}{00}
+
+\bibitem{saxena2008} A. Saxena, K. Goebel, D. Simon, and N. Eklund, ``Damage propagation modeling for aircraft engine run-to-failure simulation,'' in \emph{Proc. Int. Conf. Prognostics and Health Management (PHM)}, 2008, pp. 1--9.
+
+\bibitem{cmapssbenchmark2014} E. Ramasso and A. Saxena, ``Performance benchmarking and analysis of prognostic methods for CMAPSS datasets,'' \emph{Int. J. Prognostics and Health Management}, vol. 5, no. 2, pp. 1--15, 2014.
+
+\bibitem{lstm1997} S. Hochreiter and J. Schmidhuber, ``Long short-term memory,'' \emph{Neural Computation}, vol. 9, no. 8, pp. 1735--1780, 1997.
+
+\bibitem{regimenorm2018} X. Li, Q. Ding, and J.-Q. Sun, ``Remaining useful life estimation in prognostics using deep convolution neural networks,'' \emph{Reliability Engineering \& System Safety}, vol. 172, pp. 1--11, 2018.
+
+\bibitem{cnnlstm2024} Muthukumar G. and J. Philip, ``CNN-LSTM hybrid deep learning model for remaining useful life estimation,'' \emph{arXiv:2412.15998}, Dec. 2024.
+
+\bibitem{biclstm2026} R. H. Chowdhury, N. Daiyan, F. Ahmed, M. R. Iqbal, and M. Sheikh, ``Bi-cLSTM: residual-corrected bidirectional LSTM for aero-engine RUL estimation,'' \emph{arXiv:2603.00745}, Feb. 2026.
+
+\bibitem{multiheadattn2026} Y. Su and X. Fang, ``A multi-head attention fusion network for industrial prognostics under discrete operational conditions,'' \emph{arXiv:2604.10248}, Apr. 2026.
+
+\bibitem{sharma2025} K. Sharma, ``Uncertainty-aware deep learning framework for remaining useful life prediction in turbofan engines with learned aleatoric uncertainty,'' \emph{arXiv:2511.19124}, Nov. 2025.
+
+\bibitem{arimalstmvalve2022} S. Nie, Q. Liu, H. Ji, R. Hong, and S. Nie, ``Integration of ARIMA and LSTM models for remaining useful life prediction of a water hydraulic high-speed on/off valve,'' \emph{Applied Sciences}, vol. 12, no. 16, art. 8071, 2022.
+
+\bibitem{survey2025} U. Khan, D. Cheng, F. Setti, F. Fummi, M. Cristani, and L. Capogrosso, ``A comprehensive survey on deep learning-based predictive maintenance,'' \emph{ACM Trans. Embedded Computing Systems}, vol. 25, no. 2, Apr. 2025, doi: 10.1145/3732287.
+
+\bibitem{henderson2018} P. Henderson, R. Islam, P. Bachman, J. Pineau, D. Precup, and D. Meger, ``Deep reinforcement learning that matters,'' in \emph{Proc. AAAI Conf. Artificial Intelligence}, 2018, pp. 3207--3214.
+
+\bibitem{bouthillier2019} X. Bouthillier, C. Laurent, and P. Vincent, ``Unreproducible research is reproducible,'' in \emph{Proc. 36th Int. Conf. Machine Learning (ICML)}, 2019, pp. 725--734.
+
+\bibitem{bouthillier2021} X. Bouthillier et al., ``Accounting for variance in machine learning benchmarks,'' in \emph{Proc. Machine Learning and Systems (MLSys)}, vol. 3, 2021, pp. 747--769.
+
+\bibitem{picard2021} D. Picard, ``Torch.manual\_seed(3407) is all you need: on the influence of random seeds in deep learning architectures for computer vision,'' \emph{arXiv:2109.08203}, Sep. 2021.
+
+\bibitem{jordan2024} K. Jordan, ``On the variance of neural network training with respect to test sets and distributions,'' in \emph{Proc. Int. Conf. Learning Representations (ICLR)}, 2024.
+
+\bibitem{demsar2006} J. Dem\v{s}ar, ``Statistical comparisons of classifiers over multiple data sets,'' \emph{J. Machine Learning Research}, vol. 7, pp. 1--30, 2006.
+
+\bibitem{zhang2003} G. P. Zhang, ``Time series forecasting using a hybrid ARIMA and neural network model,'' \emph{Neurocomputing}, vol. 50, pp. 159--175, 2003.
+
+\bibitem{owen2007} A. B. Owen, ``The pigeonhole bootstrap,'' \emph{Ann. Appl. Statist.}, vol. 1, no. 2, pp. 386--411, 2007.
+
+\bibitem{goel2026} A. Goel, S. Galchar, and S. Kanu, ``Remaining useful life estimation for turbofan engines: a comparative study of classical, CNN, and LSTM approaches,'' \emph{arXiv:2604.27234}, Apr. 2026.
+
+\bibitem{babu2016} G. Sateesh Babu, P. Zhao, and X.-L. Li, ``Deep convolutional neural network based regression approach for estimation of remaining useful life,'' in \emph{Database Systems for Advanced Applications (DASFAA)}, 2016.
+
+\bibitem{zheng2017} S. Zheng, K. Ristovski, A. Farahat, and C. Gupta, ``Long short-term memory network for remaining useful life estimation,'' in \emph{Proc. IEEE Int. Conf. Prognostics and Health Management (ICPHM)}, 2017, pp. 88--95.
+
+\bibitem{colas2018} C. Colas, O. Sigaud, and P.-Y. Oudeyer, ``How many random seeds? Statistical power analysis in deep reinforcement learning experiments,'' \emph{arXiv:1806.08295}, 2018.
+
+\bibitem{agarwal2021} R. Agarwal, M. Schwarzer, P. S. Castro, A. C. Courville, and M. Bellemare, ``Deep reinforcement learning at the edge of the statistical precipice,'' in \emph{Advances in Neural Information Processing Systems (NeurIPS)}, vol. 34, 2021, pp. 29304--29320.
+
+\bibitem{holm1979} S. Holm, ``A simple sequentially rejective multiple test procedure,'' \emph{Scandinavian J. Statistics}, vol. 6, pp. 65--70, 1979.
+
+\bibitem{lakens2017} D. Lakens, ``Equivalence tests: a practical primer for $t$ tests, correlations, and meta-analyses,'' \emph{Social Psychological and Personality Science}, vol. 8, no. 4, pp. 355--362, 2017.
+
+\bibitem{gupta2026} A. Gupta, ``Auditing operating-condition normalization in C-MAPSS remaining useful life evaluation,'' \emph{engrXiv preprint 8145}, Sep. 2026.
+
+\end{thebibliography}
+
+\end{document}
